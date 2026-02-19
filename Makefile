@@ -4,11 +4,11 @@ DATE      ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 LDFLAGS   := -X github.com/rebaze/starter-sbom-toolchain/cmd.version=$(VERSION) \
              -X github.com/rebaze/starter-sbom-toolchain/cmd.commit=$(COMMIT) \
              -X github.com/rebaze/starter-sbom-toolchain/cmd.date=$(DATE)
-BIN       := sca-tool
+BIN       := scat
 
 .PHONY: build run clean vet tidy
 
-## build: compile the sca-tool binary
+## build: compile the scat binary
 build:
 	go build -ldflags "$(LDFLAGS)" -o $(BIN) .
 

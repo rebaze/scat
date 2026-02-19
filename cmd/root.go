@@ -12,7 +12,7 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "sca-tool",
+	Use:   "scat",
 	Short: "Software Composition Analysis CLI",
 	Long:  "A single-command tool for SBOM generation, vulnerability scanning, license checking, and reporting.",
 }

@@ -1,10 +1,10 @@
 version: 2
 
-project_name: sca-tool
+project_name: scat
 
 builds:
   - main: .
-    binary: sca-tool
+    binary: scat
     env:
       - CGO_ENABLED=0
     goos:
@@ -46,7 +46,7 @@ brews:
     description: Software Composition Analysis CLI — SBOM, vulnerability, and license scanning
     license: Apache-2.0
     install: |
-      bin.install "sca-tool"
+      bin.install "scat"
     test: |
-      system "#{bin}/sca-tool", "version"
+      system "#{bin}/scat", "version"
     dependencies: []

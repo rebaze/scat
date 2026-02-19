@@ -2,16 +2,16 @@
 
 A Software Composition Analysis (SCA) toolchain. It generates a CycloneDX SBOM from a source directory, scans for known vulnerabilities, checks license compliance, and produces reports in JSON, Markdown, and HTML.
 
-## sca-tool CLI
+## scat CLI
 
-`sca-tool` is a single Go binary that runs the full pipeline in one command.
+`scat` is a single Go binary that runs the full pipeline in one command.
 
 ### Installation
 
 **From source:**
 
 ```bash
-go build -o sca-tool .
+go build -o scat .
 ```
 
 **With Go install:**
@@ -24,16 +24,16 @@ go install github.com/rebaze/starter-sbom-toolchain@latest
 
 ```bash
 # Full pipeline: scan → JSON → Markdown → HTML
-sca-tool analyze /path/to/my-project
+scat analyze /path/to/my-project
 
 # Output only JSON artifacts
-sca-tool analyze /path/to/my-project --format json
+scat analyze /path/to/my-project --format json
 
 # Custom output directory
-sca-tool analyze /path/to/my-project -o ./reports
+scat analyze /path/to/my-project -o ./reports
 
 # Print version
-sca-tool version
+scat version
 ```
 
 ### Flags
@@ -47,7 +47,7 @@ sca-tool version
 
 ### Output Files
 
-For a project named `my-project`, `sca-tool analyze` produces:
+For a project named `my-project`, `scat analyze` produces:
 
 | File | Format | Description |
 |------|--------|-------------|
@@ -65,7 +65,7 @@ For a project named `my-project`, `sca-tool analyze` produces:
   source folder
        │
        ▼
-  sca-tool analyze        ← Single command
+  scat analyze        ← Single command
        │
        ├── <prefix>-sbom.json        (CycloneDX SBOM via Syft)
        ├── <prefix>-vulns.json       (vulnerability matches via Grype)

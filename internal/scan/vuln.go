@@ -23,7 +23,7 @@ func DBCacheDir() string {
 	if err != nil {
 		cacheDir = os.TempDir()
 	}
-	return filepath.Join(cacheDir, "sca-tool", "grype-db")
+	return filepath.Join(cacheDir, "scat", "grype-db")
 }
 
 // VulnDB wraps a loaded Grype vulnerability provider.
@@ -36,7 +36,7 @@ type VulnDB struct {
 func LoadVulnDB() (*VulnDB, error) {
 	dbDir := DBCacheDir()
 
-	id := clio.Identification{Name: "sca-tool", Version: "dev"}
+	id := clio.Identification{Name: "scat", Version: "dev"}
 
 	distCfg := v6dist.DefaultConfig()
 	installCfg := v6inst.DefaultConfig(id)

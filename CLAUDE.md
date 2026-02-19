@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A Software Composition Analysis (SCA) toolchain. The `sca-tool` Go CLI generates SBOMs, scans for vulnerabilities, checks licenses, and produces reports in JSON, Markdown, and HTML formats. Original bash scripts are preserved in `scripts/` for reference.
+A Software Composition Analysis (SCA) toolchain. The `scat` Go CLI generates SBOMs, scans for vulnerabilities, checks licenses, and produces reports in JSON, Markdown, and HTML formats. Original bash scripts are preserved in `scripts/` for reference.
 
 ## Repository Layout
 
@@ -28,14 +28,14 @@ scripts/                        Legacy bash scripts
 ## Build & Run
 
 ```bash
-go build -o sca-tool .
-./sca-tool analyze <folder>
-./sca-tool version
+go build -o scat .
+./scat analyze <folder>
+./scat version
 ```
 
 ## Pipeline
 
-`sca-tool analyze <folder>` runs three phases:
+`scat analyze <folder>` runs three phases:
 
 1. **Scan** — Calls Syft, Grype, Grant to produce `<prefix>-sbom.json`, `<prefix>-vulns.json`, `<prefix>-licenses.json`
 2. **Markdown Reports** — Generates `*-report-sbom.md`, `*-report-vulns.md`, `*-report-licenses.md`
