@@ -8,13 +8,14 @@ import (
 
 	"github.com/anchore/syft/syft"
 	"github.com/anchore/syft/syft/format/cyclonedxjson"
+	"github.com/anchore/syft/syft/source/directorysource"
 )
 
 // CreateSBOM uses the Syft library to generate a CycloneDX JSON SBOM.
 func CreateSBOM(sourceDir, outPath string, verbose bool) error {
 	ctx := context.Background()
 
-	src, err := syft.GetSource(ctx, "dir:"+sourceDir, syft.DefaultGetSourceConfig())
+	src, err := directorysource.NewFromPath(sourceDir)
 	if err != nil {
 		return fmt.Errorf("creating source from %s: %w", sourceDir, err)
 	}
