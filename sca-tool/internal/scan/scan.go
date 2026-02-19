@@ -21,8 +21,12 @@ func RunPipeline(sourceDir, prefix, outDir string, verbose bool) (*model.ScanRes
 		return nil, fmt.Errorf("SBOM generation: %w", err)
 	}
 
-	// Step 2: Scan for vulnerabilities
-	if err := FindVulnerabilities(sbomPath, vulnPath, verbose); err != nil {
+	// Step 2: Load vulnerability DB and scan
+	vulnDB, err := LoadVulnDB()
+	if err != nil {
+		return nil, fmt.Errorf("loading vulnerability database: %w", err)
+	}
+	if err := vulnDB.Scan(sbomPath, vulnPath, verbose); err != nil {
 		return nil, fmt.Errorf("vulnerability scan: %w", err)
 	}
 
@@ -32,17 +36,17 @@ func RunPipeline(sourceDir, prefix, outDir string, verbose bool) (*model.ScanRes
 	}
 
 	// Parse JSON results
-	sbom, err := loadJSON[model.SBOM](sbomPath)
+	sbom, err := LoadJSON[model.SBOM](sbomPath)
 	if err != nil {
 		return nil, fmt.Errorf("parsing SBOM: %w", err)
 	}
 
-	vulns, err := loadJSON[model.VulnReport](vulnPath)
+	vulns, err := LoadJSON[model.VulnReport](vulnPath)
 	if err != nil {
 		return nil, fmt.Errorf("parsing vulnerability report: %w", err)
 	}
 
-	license, err := loadJSON[model.LicenseReport](licensePath)
+	license, err := LoadJSON[model.LicenseReport](licensePath)
 	if err != nil {
 		return nil, fmt.Errorf("parsing license report: %w", err)
 	}
@@ -57,7 +61,7 @@ func RunPipeline(sourceDir, prefix, outDir string, verbose bool) (*model.ScanRes
 	}, nil
 }
 
-func loadJSON[T any](path string) (*T, error) {
+func LoadJSON[T any](path string) (*T, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err

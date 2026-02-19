@@ -12,20 +12,30 @@ import (
 	grypeMatch "github.com/anchore/grype/grype/match"
 	"github.com/anchore/grype/grype/matcher"
 	grypePkg "github.com/anchore/grype/grype/pkg"
+	"github.com/anchore/grype/grype/vulnerability"
 	"github.com/rebaze/starter-sbom-toolchain/sca-tool/internal/model"
 	"github.com/rebaze/starter-sbom-toolchain/sca-tool/internal/output"
 )
 
-// FindVulnerabilities uses the Grype library to scan an SBOM for vulnerability matches.
-func FindVulnerabilities(sbomPath, outPath string, verbose bool) error {
-	// Determine DB cache directory
+// DBCacheDir returns the path to the Grype vulnerability database cache.
+func DBCacheDir() string {
 	cacheDir, err := os.UserCacheDir()
 	if err != nil {
 		cacheDir = os.TempDir()
 	}
-	dbDir := filepath.Join(cacheDir, "sca-tool", "grype-db")
+	return filepath.Join(cacheDir, "sca-tool", "grype-db")
+}
 
-	// Load vulnerability database (auto-downloads on first run)
+// VulnDB wraps a loaded Grype vulnerability provider.
+type VulnDB struct {
+	provider vulnerability.Provider
+}
+
+// LoadVulnDB configures the DB directory and downloads/updates the Grype
+// vulnerability database, returning a VulnDB ready for scanning.
+func LoadVulnDB() (*VulnDB, error) {
+	dbDir := DBCacheDir()
+
 	id := clio.Identification{Name: "sca-tool", Version: "dev"}
 
 	distCfg := v6dist.DefaultConfig()
@@ -34,20 +44,24 @@ func FindVulnerabilities(sbomPath, outPath string, verbose bool) error {
 
 	provider, _, err := grype.LoadVulnerabilityDB(distCfg, installCfg, true)
 	if err != nil {
-		return fmt.Errorf("loading vulnerability database: %w", err)
+		return nil, fmt.Errorf("loading vulnerability database: %w", err)
 	}
 
-	// Load packages from SBOM
+	return &VulnDB{provider: provider}, nil
+}
+
+// Scan loads packages from the SBOM, matches them against the vulnerability
+// database, and writes the results as JSON to outPath.
+func (db *VulnDB) Scan(sbomPath, outPath string, verbose bool) error {
 	providerCfg := grypePkg.ProviderConfig{}
 	packages, pkgContext, _, err := grypePkg.Provide("sbom:"+sbomPath, providerCfg)
 	if err != nil {
 		return fmt.Errorf("loading packages from SBOM: %w", err)
 	}
 
-	// Run vulnerability matching
 	matchers := matcher.NewDefaultMatchers(matcher.Config{})
 	vm := grype.VulnerabilityMatcher{
-		VulnerabilityProvider: provider,
+		VulnerabilityProvider: db.provider,
 		Matchers:              matchers,
 	}
 
