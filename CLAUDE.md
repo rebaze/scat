@@ -59,3 +59,9 @@ The binary is fully self-contained.
 - Risk heuristic: Critical vulns → Critical risk, High vulns → High risk, >5 Medium vulns → Medium risk, otherwise Low
 - Output files written to `--output-dir` (default: current directory)
 - Version injected via ldflags at build time
+
+## Release Rules
+
+- **NEVER delete tags** — tags are immutable, even if a release is broken
+- **NEVER re-create releases** on existing tags — instead, bump the version and create a new release
+- When fixing a broken release, increment the micro (patch) version by default (e.g. `v0.1.0` → `v0.1.1`) unless told otherwise
