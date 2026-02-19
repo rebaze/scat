@@ -112,12 +112,6 @@
     border-bottom: 1px solid var(--border);
   }
 
-  .two-col {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-  }
-
   table {
     width: 100%;
     border-collapse: collapse;
@@ -212,6 +206,9 @@
     margin-top: 6px;
   }
 
+  .accordion details { border-top: 1px solid var(--border); padding-top: 16px; margin-top: 16px; }
+  .accordion details:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+
   footer {
     margin-top: 48px;
     padding-top: 16px;
@@ -225,13 +222,11 @@
     body { background: #fff; }
     .page { padding: 20px; }
     .cards { grid-template-columns: repeat(4, 1fr); }
-    .two-col { grid-template-columns: 1fr 1fr; }
     tbody tr:hover { background: none; }
   }
 
   @media (max-width: 768px) {
     .cards { grid-template-columns: repeat(2, 1fr); }
-    .two-col { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -301,57 +296,60 @@
 {{end}}
 </section>
 
-<section>
-  <div class="two-col">
-    <div>
-      <h2>Composition by Ecosystem</h2>
-      <table>
-        <thead><tr><th>Ecosystem</th><th>Packages</th></tr></thead>
-        <tbody>
+<section class="accordion">
+  <details>
+    <summary style="cursor:pointer;font-size:18px;font-weight:700;padding-bottom:8px;">
+      Composition by Ecosystem ({{len .Ecosystems}} ecosystems)
+    </summary>
+    <table>
+      <thead><tr><th>Ecosystem</th><th>Packages</th></tr></thead>
+      <tbody>
 {{range .Ecosystems}}
-          <tr><td>{{.Key}}</td><td>{{.Count}}</td></tr>
+        <tr><td>{{.Key}}</td><td>{{.Count}}</td></tr>
 {{end}}
-        </tbody>
-      </table>
-    </div>
-    <div>
-      <h2>License Distribution</h2>
-      <table>
-        <thead><tr><th>License</th><th>Packages</th></tr></thead>
-        <tbody>
+      </tbody>
+    </table>
+  </details>
+
+  <details>
+    <summary style="cursor:pointer;font-size:18px;font-weight:700;padding-bottom:8px;">
+      License Distribution ({{.LicUnique}} licenses)
+    </summary>
+    <table>
+      <thead><tr><th>License</th><th>Packages</th></tr></thead>
+      <tbody>
 {{if .LicenseDist}}
 {{range .LicenseDist}}
-          <tr><td>{{.Key}}</td><td>{{.Count}}</td></tr>
+        <tr><td>{{.Key}}</td><td>{{.Count}}</td></tr>
 {{end}}
 {{else}}
-          <tr><td colspan="2">No license data available</td></tr>
+        <tr><td colspan="2">No license data available</td></tr>
 {{end}}
-        </tbody>
-      </table>
-      <p class="footnote">{{.LicNonSPDX}} non-SPDX license identifiers detected</p>
-    </div>
-  </div>
-</section>
+      </tbody>
+    </table>
+    <p class="footnote">{{.LicNonSPDX}} non-SPDX license identifiers detected</p>
+  </details>
 
 {{if gt .DeniedTotal 0}}
-<section>
-  <h2>Denied Components ({{.DeniedTotal}})</h2>
-  <table>
-    <thead><tr><th>Package</th><th>Version</th><th>License</th></tr></thead>
-    <tbody>
+  <details>
+    <summary style="cursor:pointer;font-size:18px;font-weight:700;padding-bottom:8px;">
+      Denied Components ({{.DeniedTotal}})
+    </summary>
+    <table>
+      <thead><tr><th>Package</th><th>Version</th><th>License</th></tr></thead>
+      <tbody>
 {{range .DeniedPkgs}}
-      <tr><td>{{.Name}}</td><td>{{.Version}}</td><td>{{.Licenses}}</td></tr>
+        <tr><td>{{.Name}}</td><td>{{.Version}}</td><td>{{.Licenses}}</td></tr>
 {{end}}
-    </tbody>
-  </table>
+      </tbody>
+    </table>
 {{if gt .DeniedTotal 20}}
-  <p class="footnote">Showing first 20 of {{.DeniedTotal}} denied packages. See full report for details.</p>
+    <p class="footnote">Showing first 20 of {{.DeniedTotal}} denied packages. See full report for details.</p>
 {{end}}
-</section>
+  </details>
 {{end}}
 
 {{if .Components}}
-<section>
   <details id="component-inventory">
     <summary style="cursor:pointer;font-size:18px;font-weight:700;padding-bottom:8px;">
       Full Component Inventory ({{len .Components}} components)
@@ -371,7 +369,9 @@
       </table>
     </div>
   </details>
+{{end}}
 </section>
+{{if .Components}}
 <script>
 (function(){
   var input = document.getElementById('comp-filter');
