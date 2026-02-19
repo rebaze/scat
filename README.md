@@ -1,64 +1,83 @@
 # starter-sbom-toolchain
 
-A lightweight shell-based toolchain for Software Composition Analysis (SCA). It generates a CycloneDX SBOM from a source directory, scans for known vulnerabilities, checks license compliance, and produces human-readable reports in Markdown and HTML.
+A Software Composition Analysis (SCA) toolchain. It generates a CycloneDX SBOM from a source directory, scans for known vulnerabilities, checks license compliance, and produces reports in JSON, Markdown, and HTML.
+
+## sca-tool CLI
+
+`sca-tool` is a single Go binary that runs the full pipeline in one command.
+
+### Installation
+
+**From source:**
+
+```bash
+cd sca-tool
+go build -o sca-tool .
+```
+
+**With Go install:**
+
+```bash
+go install github.com/rebaze/starter-sbom-toolchain/sca-tool@latest
+```
+
+### Usage
+
+```bash
+# Full pipeline: scan → JSON → Markdown → HTML
+sca-tool analyze /path/to/my-project
+
+# Output only JSON artifacts
+sca-tool analyze /path/to/my-project --format json
+
+# Custom output directory
+sca-tool analyze /path/to/my-project -o ./reports
+
+# Print version
+sca-tool version
+```
+
+### Flags
+
+| Flag | Short | Default | Description |
+|------|-------|---------|-------------|
+| `--output-dir` | `-o` | `.` | Directory for output files |
+| `--format` | `-f` | `all` | Output format: `json`, `markdown`, `html`, `all` |
+| `--verbose` | `-v` | `false` | Verbose output |
+| `--quiet` | `-q` | `false` | Suppress non-error output |
+
+### Output Files
+
+For a project named `my-project`, `sca-tool analyze` produces:
+
+| File | Format | Description |
+|------|--------|-------------|
+| `my-project-sbom.json` | JSON | CycloneDX SBOM |
+| `my-project-vulns.json` | JSON | Vulnerability matches |
+| `my-project-licenses.json` | JSON | License evaluation |
+| `my-project-report-sbom.md` | Markdown | SBOM inventory report |
+| `my-project-report-vulns.md` | Markdown | Vulnerability details |
+| `my-project-report-licenses.md` | Markdown | License compliance report |
+| `my-project-summary.html` | HTML | Dashboard with severity bars, risk scoring, and print layout |
 
 ## Pipeline
-
-The toolchain runs in two stages:
 
 ```
   source folder
        │
        ▼
-  sbom-scan.sh        ← Stage 1: Scan
+  sca-tool analyze        ← Single command
        │
-       ├── <prefix>-sbom.json        (CycloneDX SBOM)
-       ├── <prefix>-vulns.json       (vulnerability matches)
-       └── <prefix>-licenses.json    (license evaluation)
-               │
-       ┌───────┴───────┐
-       ▼               ▼
-  sbom-report.sh   sbom-summary.sh   ← Stage 2: Report
-       │               │
-       ├── *-report-sbom.md        <prefix>-summary.html
-       ├── *-report-vulns.md
-       └── *-report-licenses.md
+       ├── <prefix>-sbom.json        (CycloneDX SBOM via Syft)
+       ├── <prefix>-vulns.json       (vulnerability matches via Grype)
+       ├── <prefix>-licenses.json    (license evaluation via Grant)
+       │
+       ├── <prefix>-report-sbom.md
+       ├── <prefix>-report-vulns.md
+       ├── <prefix>-report-licenses.md
+       │
+       └── <prefix>-summary.html     (HTML dashboard)
 ```
-
-### Stage 1: Scan
-
-`sbom-scan.sh` takes a folder path, derives a prefix from its basename, and runs three tools in sequence:
-
-1. **Syft** generates a CycloneDX JSON SBOM from the directory contents
-2. **Grype** scans the SBOM for known vulnerabilities
-3. **Grant** evaluates license compliance against the SBOM
-
-All three JSON outputs are written to the current working directory.
-
-```bash
-./sbom-scan.sh /path/to/my-project
-# produces: my-project-sbom.json, my-project-vulns.json, my-project-licenses.json
-```
-
-### Stage 2: Report
-
-Two scripts consume the JSON files from Stage 1. Both take the prefix as their only argument.
-
-**`sbom-report.sh`** generates three Markdown files covering the SBOM inventory, vulnerability details, and license status:
-
-```bash
-./sbom-report.sh my-project
-# produces: my-project-report-sbom.md, my-project-report-vulns.md, my-project-report-licenses.md
-```
-
-**`sbom-summary.sh`** generates a single-page HTML dashboard with executive summary cards, a severity distribution bar, top vulnerabilities, ecosystem breakdown, and license distribution:
-
-```bash
-./sbom-summary.sh my-project
-# produces: my-project-summary.html
-```
-
-The HTML report includes a risk level heuristic based on vulnerability severity counts.
 
 ## Prerequisites
 
@@ -69,19 +88,18 @@ The following tools must be available on `PATH`:
 | [Syft](https://github.com/anchore/syft) | SBOM generation |
 | [Grype](https://github.com/anchore/grype) | Vulnerability scanning |
 | [Grant](https://github.com/anchore/grant) | License compliance |
-| [jq](https://jqlang.github.io/jq/) | JSON processing |
 
-## Quick Start
+## Shell Scripts (legacy)
+
+The original shell scripts are available in `scripts/` for reference:
 
 ```bash
-# 1. Scan a project
-./sbom-scan.sh ./my-project
+# Scan
+./scripts/sbom-scan.sh ./my-project
 
-# 2. Generate reports (pick one or both)
-./sbom-report.sh my-project      # Markdown reports
-./sbom-summary.sh my-project     # HTML dashboard
-
-# 3. View the HTML summary
-open my-project-summary.html     # macOS
-xdg-open my-project-summary.html # Linux
+# Reports
+./scripts/sbom-report.sh my-project
+./scripts/sbom-summary.sh my-project
 ```
+
+These require `jq` in addition to Syft, Grype, and Grant.
