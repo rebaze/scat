@@ -49,6 +49,4 @@ brews:
       bin.install "sca-tool"
     test: |
       system "#{bin}/sca-tool", "version"
-    dependencies:
-      - name: syft
-      - name: grype
+    dependencies: []

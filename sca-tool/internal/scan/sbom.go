@@ -1,33 +1,41 @@
 package scan
 
 import (
+	"bytes"
+	"context"
 	"fmt"
-	"os/exec"
+	"os"
+
+	"github.com/anchore/syft/syft"
+	"github.com/anchore/syft/syft/format/cyclonedxjson"
 )
 
-// CreateSBOM runs syft to generate a CycloneDX JSON SBOM.
+// CreateSBOM uses the Syft library to generate a CycloneDX JSON SBOM.
 func CreateSBOM(sourceDir, outPath string, verbose bool) error {
-	if _, err := exec.LookPath("syft"); err != nil {
-		return fmt.Errorf("syft not found in PATH: %w", err)
+	ctx := context.Background()
+
+	src, err := syft.GetSource(ctx, "dir:"+sourceDir, syft.DefaultGetSourceConfig())
+	if err != nil {
+		return fmt.Errorf("creating source from %s: %w", sourceDir, err)
 	}
 
-	args := []string{
-		"dir:" + sourceDir,
-		"-o", "cyclonedx-json=" + outPath,
-	}
-	if quiet := !verbose; quiet {
-		args = append(args, "-q")
+	s, err := syft.CreateSBOM(ctx, src, syft.DefaultCreateSBOMConfig())
+	if err != nil {
+		return fmt.Errorf("creating SBOM: %w", err)
 	}
 
-	cmd := exec.Command("syft", args...)
-	if verbose {
-		cmd.Stdout = nil // syft writes JSON to file via -o flag
-		cmd.Stderr = nil
+	encoder, err := cyclonedxjson.NewFormatEncoderWithConfig(cyclonedxjson.EncoderConfig{
+		Version: "1.6",
+		Pretty:  true,
+	})
+	if err != nil {
+		return fmt.Errorf("creating CycloneDX encoder: %w", err)
 	}
 
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("syft scan failed: %w", err)
+	var buf bytes.Buffer
+	if err := encoder.Encode(&buf, *s); err != nil {
+		return fmt.Errorf("encoding SBOM: %w", err)
 	}
 
-	return nil
+	return os.WriteFile(outPath, buf.Bytes(), 0o644)
 }
