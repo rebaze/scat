@@ -15,7 +15,7 @@ cmd/                            Cobra CLI commands
   analyze.go                    Full pipeline command
   version.go                    Version from ldflags
 internal/
-  scan/                         Pipeline orchestration (calls syft/grype/grant)
+  scan/                         Pipeline orchestration (uses syft/grype Go libraries)
   model/                        Data types (SBOM, VulnReport, LicenseReport, RiskScore)
   report/                       Markdown + HTML report generation
     templates/                  go:embed HTML template
@@ -36,25 +36,25 @@ go build -o scat .
 
 `scat analyze <folder>` runs three phases:
 
-1. **Scan** — Calls Syft, Grype, Grant to produce `<prefix>-sbom.json`, `<prefix>-vulns.json`, `<prefix>-licenses.json`
+1. **Scan** — Uses Syft library for SBOM, Grype library for vulns, custom Go logic for licenses; produces `<prefix>-sbom.json`, `<prefix>-vulns.json`, `<prefix>-licenses.json`
 2. **Markdown Reports** — Generates `*-report-sbom.md`, `*-report-vulns.md`, `*-report-licenses.md`
 3. **HTML Dashboard** — Generates `<prefix>-summary.html` with severity bars, risk scoring, print-friendly layout
 
 The `<prefix>` is derived from the scanned folder's basename.
 
-## External Tool Dependencies
+## Go Library Dependencies
 
-The scan phase requires these tools on PATH:
-- **syft** — SBOM generation
-- **grype** — Vulnerability scanning
-- **grant** — License checking
+The scan phase uses these Go libraries (no external tools required on PATH):
+- **github.com/anchore/syft** — SBOM generation
+- **github.com/anchore/grype** — Vulnerability scanning (DB cached in `~/.cache/scat/grype-db`)
+- License checking is a pure Go implementation (no external dependency)
 
-Report generation (Markdown + HTML) is pure Go with no external dependencies.
+The binary is fully self-contained.
 
 ## Conventions
 
 - Go code follows standard `internal/` package layout
-- Model types in `internal/model/` mirror the JSON schemas from Syft/Grype/Grant output
+- Model types in `internal/model/` mirror CycloneDX and Grype data structures
 - HTML template uses `go:embed` for self-contained binary
 - Risk heuristic: Critical vulns → Critical risk, High vulns → High risk, >5 Medium vulns → Medium risk, otherwise Low
 - Output files written to `--output-dir` (default: current directory)
