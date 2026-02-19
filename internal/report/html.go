@@ -30,7 +30,7 @@ type htmlData struct {
 	PctNegligible string
 	NegligibleTotal int // Negligible + Unknown combined (matches bash behavior)
 
-	CritHighVulns []vulnRow
+	AllVulns []vulnRow
 
 	// License summary
 	LicDenied     int
@@ -51,6 +51,7 @@ type vulnRow struct {
 	ID       string
 	Severity string
 	SevClass string
+	SevOrder int
 	Package  string
 	Version  string
 	Fix      string
@@ -97,8 +98,8 @@ func GenerateHTML(result *model.ScanResult, prefix, outDir, generatedAt string) 
 		data.PctNegligible = pct(negligibleTotal, sev.Total)
 	}
 
-	// Critical + High vulns table
-	data.CritHighVulns = buildCritHighVulns(result.Vulns)
+	// All vulns table
+	data.AllVulns = buildAllVulns(result.Vulns)
 
 	// License summary (from first target)
 	if len(result.License.Run.Targets) > 0 {
@@ -183,12 +184,12 @@ func pct(count, total int) string {
 	return fmt.Sprintf("%.1f", float64(count)*100.0/float64(total))
 }
 
-func buildCritHighVulns(vulns *model.VulnReport) []vulnRow {
+func buildAllVulns(vulns *model.VulnReport) []vulnRow {
 	var rows []vulnRow
 	for _, m := range vulns.Matches {
 		sev := m.Vulnerability.Severity
-		if sev != "Critical" && sev != "High" {
-			continue
+		if sev == "" {
+			sev = "Unknown"
 		}
 		fix := m.Vulnerability.Fix.State
 		if fix == "" {
@@ -202,6 +203,7 @@ func buildCritHighVulns(vulns *model.VulnReport) []vulnRow {
 			ID:       m.Vulnerability.ID,
 			Severity: sev,
 			SevClass: strings.ToLower(sev),
+			SevOrder: severityOrder(sev),
 			Package:  m.Artifact.Name,
 			Version:  version,
 			Fix:      fix,

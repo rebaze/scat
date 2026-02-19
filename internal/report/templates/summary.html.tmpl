@@ -19,6 +19,7 @@
     --medium: #f39c12;
     --low: #2d8a4e;
     --negligible: #8395a7;
+    --unknown: #a0aab4;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -37,8 +38,10 @@
     padding: 48px 40px;
   }
 
+  /* Header with gradient accent line */
   header {
-    border-bottom: 3px solid var(--text);
+    border-bottom: 3px solid transparent;
+    border-image: linear-gradient(90deg, var(--accent), var(--critical), var(--high), var(--medium), var(--low)) 1;
     padding-bottom: 20px;
     margin-bottom: 40px;
   }
@@ -55,6 +58,7 @@
     color: var(--text-secondary);
   }
 
+  /* Cards with shadow and hover lift */
   .cards {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -65,8 +69,15 @@
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 20px 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
   }
 
   .card .label {
@@ -91,27 +102,32 @@
     margin-top: 6px;
   }
 
+  /* Risk badge — larger and bolder */
   .risk-badge {
     display: inline-block;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 3px 12px;
-    border-radius: 4px;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 5px 16px;
+    border-radius: 5px;
     color: #fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
   }
 
   section {
     margin-bottom: 40px;
   }
 
+  /* Section headings — thicker border, tighter letter-spacing */
   h2 {
     font-size: 18px;
     font-weight: 700;
     margin-bottom: 16px;
     padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 2px solid var(--border);
+    letter-spacing: -0.3px;
   }
 
+  /* Tables with zebra striping */
   table {
     width: 100%;
     border-collapse: collapse;
@@ -137,15 +153,18 @@
   }
 
   tbody tr:last-child td { border-bottom: none; }
-  tbody tr:hover { background: #f0f2f5; }
+  tbody tr:nth-child(even) { background: #fafbfc; }
+  tbody tr:hover { background: #edf0f4; }
 
+  /* Severity bar — taller, rounder, inset shadow */
   .sev-bar {
     display: flex;
-    height: 28px;
-    border-radius: 6px;
+    height: 32px;
+    border-radius: 8px;
     overflow: hidden;
     margin-bottom: 12px;
     background: var(--border);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.12);
   }
 
   .sev-bar > div {
@@ -170,6 +189,7 @@
     font-size: 13px;
     color: var(--text-secondary);
     margin-bottom: 20px;
+    flex-wrap: wrap;
   }
 
   .sev-legend span::before {
@@ -188,8 +208,92 @@
   .sev-legend .l-low::before  { background: var(--low); }
   .sev-legend .l-neg::before  { background: var(--negligible); }
 
-  tr.sev-critical td:first-child { border-left: 3px solid var(--critical); }
-  tr.sev-high td:first-child     { border-left: 3px solid var(--high); }
+  /* Severity row left-border colors — all levels */
+  tr.sev-critical td:first-child    { border-left: 3px solid var(--critical); }
+  tr.sev-high td:first-child        { border-left: 3px solid var(--high); }
+  tr.sev-medium td:first-child      { border-left: 3px solid var(--medium); }
+  tr.sev-low td:first-child         { border-left: 3px solid var(--low); }
+  tr.sev-negligible td:first-child  { border-left: 3px solid var(--negligible); }
+  tr.sev-unknown td:first-child     { border-left: 3px solid var(--unknown); }
+
+  /* Severity pills */
+  .sev-pill {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 12px;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .sev-pill-critical    { background: var(--critical); }
+  .sev-pill-high        { background: var(--high); }
+  .sev-pill-medium      { background: var(--medium); color: var(--text); }
+  .sev-pill-low         { background: var(--low); }
+  .sev-pill-negligible  { background: var(--negligible); }
+  .sev-pill-unknown     { background: var(--unknown); }
+
+  /* Vuln filter buttons */
+  .vuln-filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 5px 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .filter-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .filter-btn.active[data-filter="critical"]   { background: var(--critical); border-color: var(--critical); }
+  .filter-btn.active[data-filter="high"]        { background: var(--high); border-color: var(--high); }
+  .filter-btn.active[data-filter="medium"]      { background: var(--medium); border-color: var(--medium); color: var(--text); }
+  .filter-btn.active[data-filter="low"]         { background: var(--low); border-color: var(--low); }
+  .filter-btn.active[data-filter="other"]       { background: var(--negligible); border-color: var(--negligible); }
+
+  /* Sortable column headers */
+  .sortable {
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  .sortable:hover {
+    color: var(--accent);
+  }
+
+  .sort-icon {
+    font-size: 10px;
+    margin-left: 4px;
+    opacity: 0.4;
+  }
+
+  .sortable.sort-active .sort-icon {
+    opacity: 1;
+    color: var(--accent);
+  }
 
   .tag {
     display: inline-block;
@@ -206,27 +310,140 @@
     margin-top: 6px;
   }
 
-  .accordion details { border-top: 1px solid var(--border); padding-top: 16px; margin-top: 16px; }
-  .accordion details:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+  /* Accordion styling — bordered cards with shadow */
+  .accordion details {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0;
+    margin-top: 16px;
+    background: var(--surface);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    overflow: hidden;
+  }
 
+  .accordion details:first-child {
+    margin-top: 0;
+  }
+
+  .accordion details summary {
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 700;
+    padding: 16px 20px;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.15s ease;
+  }
+
+  .accordion details summary:hover {
+    background: var(--bg);
+  }
+
+  .accordion details summary::-webkit-details-marker { display: none; }
+
+  .accordion details summary::before {
+    content: '\25B6';
+    font-size: 12px;
+    color: var(--text-secondary);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .accordion details[open] summary::before {
+    transform: rotate(90deg);
+  }
+
+  .accordion details > :not(summary) {
+    padding: 0 20px;
+  }
+
+  .accordion details > table {
+    margin: 0;
+  }
+
+  .accordion details > table thead th {
+    padding-left: 20px;
+  }
+
+  .accordion details > table tbody td:first-child {
+    padding-left: 20px;
+  }
+
+  .accordion details > p.footnote {
+    padding: 0 20px 16px;
+  }
+
+  .accordion details > div {
+    padding: 0 20px 16px;
+  }
+
+  /* Accordion badge */
+  .accordion-badge {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 1px 10px;
+    border-radius: 12px;
+    background: var(--bg);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+  }
+
+  /* Footer — thicker top border, more spacing */
   footer {
     margin-top: 48px;
-    padding-top: 16px;
-    border-top: 1px solid var(--border);
+    padding-top: 20px;
+    border-top: 2px solid var(--border);
     font-size: 12px;
     color: var(--text-secondary);
     text-align: center;
   }
 
+  /* Print styles */
   @media print {
     body { background: #fff; }
     .page { padding: 20px; }
     .cards { grid-template-columns: repeat(4, 1fr); }
+    .card { box-shadow: none; }
+    .card:hover { transform: none; }
     tbody tr:hover { background: none; }
+    .vuln-filters { display: none; }
+    #comp-filter { display: none; }
+    .accordion details { box-shadow: none; break-inside: avoid; }
+    .sev-pill { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .sev-bar { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .risk-badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    tr.sev-critical td:first-child,
+    tr.sev-high td:first-child,
+    tr.sev-medium td:first-child,
+    tr.sev-low td:first-child,
+    tr.sev-negligible td:first-child,
+    tr.sev-unknown td:first-child {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .sev-legend span::before {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    tbody tr:nth-child(even) { background: none; }
   }
 
+  /* Responsive — tablet */
   @media (max-width: 768px) {
     .cards { grid-template-columns: repeat(2, 1fr); }
+    .vuln-filters { gap: 6px; }
+    .filter-btn { padding: 4px 10px; font-size: 12px; }
+  }
+
+  /* Responsive — mobile */
+  @media (max-width: 480px) {
+    .page { padding: 24px 16px; }
+    .cards { grid-template-columns: 1fr; }
+    .sev-legend { flex-direction: column; gap: 6px; }
+    .vuln-filters { flex-wrap: wrap; }
   }
 </style>
 </head>
@@ -283,23 +500,44 @@
   <p style="color:var(--low);font-weight:600;">No vulnerabilities found.</p>
 {{end}}
 
-{{if .CritHighVulns}}
-  <h2 style="border:none;margin-top:24px;">Critical &amp; High Vulnerabilities</h2>
-  <table>
-    <thead><tr><th>CVE / ID</th><th>Severity</th><th>Package</th><th>Version</th><th>Fix</th></tr></thead>
+{{if .AllVulns}}
+  <h2 style="border:none;margin-top:24px;">All Vulnerabilities</h2>
+  <div class="vuln-filters">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="critical">Critical</button>
+    <button class="filter-btn" data-filter="high">High</button>
+    <button class="filter-btn" data-filter="medium">Medium</button>
+    <button class="filter-btn" data-filter="low">Low</button>
+    <button class="filter-btn" data-filter="other">Other</button>
+  </div>
+  <table id="vuln-table">
+    <thead><tr>
+      <th>CVE / ID</th>
+      <th class="sortable" data-sort="severity">Severity <span class="sort-icon">&#9650;</span></th>
+      <th class="sortable" data-sort="package">Package <span class="sort-icon">&#9650;</span></th>
+      <th>Version</th>
+      <th>Fix</th>
+    </tr></thead>
     <tbody>
-{{range .CritHighVulns}}
-      <tr class="sev-{{.SevClass}}"><td>{{.ID}}</td><td>{{.Severity}}</td><td>{{.Package}}</td><td>{{.Version}}</td><td>{{.Fix}}</td></tr>
+{{range .AllVulns}}
+      <tr class="sev-{{.SevClass}}" data-sev="{{.SevClass}}" data-sev-order="{{.SevOrder}}">
+        <td>{{.ID}}</td>
+        <td><span class="sev-pill sev-pill-{{.SevClass}}">{{.Severity}}</span></td>
+        <td>{{.Package}}</td>
+        <td>{{.Version}}</td>
+        <td>{{.Fix}}</td>
+      </tr>
 {{end}}
     </tbody>
   </table>
+  <p class="footnote" id="vuln-count">Showing {{len .AllVulns}} of {{len .AllVulns}} vulnerabilities</p>
 {{end}}
 </section>
 
 <section class="accordion">
   <details>
-    <summary style="cursor:pointer;font-size:18px;font-weight:700;padding-bottom:8px;">
-      Composition by Ecosystem ({{len .Ecosystems}} ecosystems)
+    <summary>
+      Composition by Ecosystem <span class="accordion-badge">{{len .Ecosystems}}</span>
     </summary>
     <table>
       <thead><tr><th>Ecosystem</th><th>Packages</th></tr></thead>
@@ -312,8 +550,8 @@
   </details>
 
   <details>
-    <summary style="cursor:pointer;font-size:18px;font-weight:700;padding-bottom:8px;">
-      License Distribution ({{.LicUnique}} licenses)
+    <summary>
+      License Distribution <span class="accordion-badge">{{.LicUnique}}</span>
     </summary>
     <table>
       <thead><tr><th>License</th><th>Packages</th></tr></thead>
@@ -332,8 +570,8 @@
 
 {{if gt .DeniedTotal 0}}
   <details>
-    <summary style="cursor:pointer;font-size:18px;font-weight:700;padding-bottom:8px;">
-      Denied Components ({{.DeniedTotal}})
+    <summary>
+      Denied Components <span class="accordion-badge">{{.DeniedTotal}}</span>
     </summary>
     <table>
       <thead><tr><th>Package</th><th>Version</th><th>License</th></tr></thead>
@@ -351,10 +589,10 @@
 
 {{if .Components}}
   <details id="component-inventory">
-    <summary style="cursor:pointer;font-size:18px;font-weight:700;padding-bottom:8px;">
-      Full Component Inventory ({{len .Components}} components)
+    <summary>
+      Full Component Inventory <span class="accordion-badge">{{len .Components}}</span>
     </summary>
-    <div style="margin-top:12px;">
+    <div>
       <input type="text" id="comp-filter" placeholder="Filter components..." style="
         width:100%;padding:8px 12px;font-size:14px;border:1px solid var(--border);
         border-radius:6px;margin-bottom:12px;font-family:inherit;
@@ -371,6 +609,91 @@
   </details>
 {{end}}
 </section>
+
+{{if .AllVulns}}
+<script>
+(function(){
+  /* -- Vulnerability filter buttons -- */
+  var filterBtns = document.querySelectorAll('.filter-btn');
+  var vulnRows = document.querySelectorAll('#vuln-table tbody tr');
+  var vulnCount = document.getElementById('vuln-count');
+  var totalVulns = vulnRows.length;
+
+  function updateCount() {
+    var visible = 0;
+    vulnRows.forEach(function(row) {
+      if (row.style.display !== 'none') visible++;
+    });
+    vulnCount.textContent = 'Showing ' + visible + ' of ' + totalVulns + ' vulnerabilities';
+  }
+
+  filterBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      filterBtns.forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      var filter = btn.getAttribute('data-filter');
+
+      vulnRows.forEach(function(row) {
+        var sev = row.getAttribute('data-sev');
+        if (filter === 'all') {
+          row.style.display = '';
+        } else if (filter === 'other') {
+          row.style.display = (sev !== 'critical' && sev !== 'high' && sev !== 'medium' && sev !== 'low') ? '' : 'none';
+        } else {
+          row.style.display = (sev === filter) ? '' : 'none';
+        }
+      });
+      updateCount();
+    });
+  });
+
+  /* -- Sortable columns -- */
+  var sortHeaders = document.querySelectorAll('#vuln-table .sortable');
+  var tbody = document.querySelector('#vuln-table tbody');
+  var sortState = {};
+
+  sortHeaders.forEach(function(th) {
+    var sortKey = th.getAttribute('data-sort');
+    sortState[sortKey] = 'asc';
+
+    th.addEventListener('click', function() {
+      var dir = sortState[sortKey] === 'asc' ? 'desc' : 'asc';
+      sortState[sortKey] = dir;
+
+      /* Update sort icons */
+      sortHeaders.forEach(function(h) {
+        h.classList.remove('sort-active');
+        h.querySelector('.sort-icon').innerHTML = '&#9650;';
+      });
+      th.classList.add('sort-active');
+      th.querySelector('.sort-icon').innerHTML = dir === 'asc' ? '&#9650;' : '&#9660;';
+
+      var rows = Array.prototype.slice.call(vulnRows);
+      rows.sort(function(a, b) {
+        var valA, valB;
+        if (sortKey === 'severity') {
+          valA = parseInt(a.getAttribute('data-sev-order'), 10);
+          valB = parseInt(b.getAttribute('data-sev-order'), 10);
+        } else if (sortKey === 'package') {
+          valA = a.cells[2].textContent.toLowerCase();
+          valB = b.cells[2].textContent.toLowerCase();
+        }
+        var cmp;
+        if (typeof valA === 'number') {
+          cmp = valA - valB;
+        } else {
+          cmp = valA < valB ? -1 : (valA > valB ? 1 : 0);
+        }
+        return dir === 'asc' ? cmp : -cmp;
+      });
+
+      rows.forEach(function(row) { tbody.appendChild(row); });
+    });
+  });
+})();
+</script>
+{{end}}
+
 {{if .Components}}
 <script>
 (function(){
