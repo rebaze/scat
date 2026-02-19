@@ -9,11 +9,8 @@ builds:
       - CGO_ENABLED=0
     goos:
       - linux
-      - darwin
-      - windows
     goarch:
       - amd64
-      - arm64
     ldflags:
       - -s -w
       - -X github.com/rebaze/scat/cmd.version={{.Version}}
@@ -24,10 +21,6 @@ archives:
   - formats:
       - tar.gz
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-    format_overrides:
-      - goos: windows
-        formats:
-          - zip
 
 checksum:
   name_template: "checksums.txt"
@@ -44,6 +37,7 @@ homebrew_casks:
   - repository:
       owner: rebaze
       name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
     homepage: https://github.com/rebaze/scat
     description: Software Composition Analysis CLI — SBOM, vulnerability, and license scanning
     license: Apache-2.0
