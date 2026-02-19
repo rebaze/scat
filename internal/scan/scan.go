@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/rebaze/scat/internal/model"
 )
@@ -36,7 +37,7 @@ func RunPipeline(sourceDir, prefix, outDir string, verbose bool) (*model.ScanRes
 	}
 
 	// Parse JSON results
-	sbom, err := LoadJSON[model.SBOM](sbomPath)
+	sbom, err := LoadSBOM(sbomPath)
 	if err != nil {
 		return nil, fmt.Errorf("parsing SBOM: %w", err)
 	}
@@ -71,4 +72,61 @@ func LoadJSON[T any](path string) (*T, error) {
 		return nil, err
 	}
 	return &v, nil
+}
+
+// cdxSBOMWithProps is an intermediate struct for extracting CycloneDX properties.
+type cdxSBOMWithProps struct {
+	BOMFormat    string             `json:"bomFormat"`
+	SpecVersion  string             `json:"specVersion"`
+	SerialNumber string             `json:"serialNumber"`
+	Components   []cdxComponentProps `json:"components"`
+}
+
+type cdxComponentProps struct {
+	Name       string        `json:"name"`
+	Version    string        `json:"version"`
+	Type       string        `json:"type"`
+	PURL       string        `json:"purl"`
+	Properties []cdxProperty `json:"properties"`
+}
+
+type cdxProperty struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+// LoadSBOM parses a CycloneDX SBOM JSON and extracts syft:location properties into Component.Locations.
+func LoadSBOM(path string) (*model.SBOM, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	var raw cdxSBOMWithProps
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return nil, err
+	}
+
+	sbom := &model.SBOM{
+		BOMFormat:    raw.BOMFormat,
+		SpecVersion:  raw.SpecVersion,
+		SerialNumber: raw.SerialNumber,
+	}
+
+	for _, c := range raw.Components {
+		comp := model.Component{
+			Name:    c.Name,
+			Version: c.Version,
+			Type:    c.Type,
+			PURL:    c.PURL,
+		}
+		for _, p := range c.Properties {
+			if strings.HasPrefix(p.Name, "syft:location:") && strings.HasSuffix(p.Name, ":path") {
+				comp.Locations = append(comp.Locations, p.Value)
+			}
+		}
+		sbom.Components = append(sbom.Components, comp)
+	}
+
+	return sbom, nil
 }

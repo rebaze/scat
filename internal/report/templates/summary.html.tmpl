@@ -350,6 +350,42 @@
 </section>
 {{end}}
 
+{{if .Components}}
+<section>
+  <details id="component-inventory">
+    <summary style="cursor:pointer;font-size:18px;font-weight:700;padding-bottom:8px;">
+      Full Component Inventory ({{len .Components}} components)
+    </summary>
+    <div style="margin-top:12px;">
+      <input type="text" id="comp-filter" placeholder="Filter components..." style="
+        width:100%;padding:8px 12px;font-size:14px;border:1px solid var(--border);
+        border-radius:6px;margin-bottom:12px;font-family:inherit;
+      ">
+      <table id="comp-table">
+        <thead><tr><th>Component</th><th>Version</th><th>Ecosystem</th><th>Source Location</th></tr></thead>
+        <tbody>
+{{range .Components}}
+          <tr><td>{{.Name}}</td><td><span class="tag">{{.Version}}</span></td><td>{{.Ecosystem}}</td><td style="font-family:'Source Code Pro',monospace;font-size:13px;">{{.Locations}}</td></tr>
+{{end}}
+        </tbody>
+      </table>
+    </div>
+  </details>
+</section>
+<script>
+(function(){
+  var input = document.getElementById('comp-filter');
+  var rows = document.querySelectorAll('#comp-table tbody tr');
+  input.addEventListener('input', function(){
+    var q = this.value.toLowerCase();
+    rows.forEach(function(row){
+      row.style.display = row.textContent.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+    });
+  });
+})();
+</script>
+{{end}}
+
 <footer>
   Generated from SBOM scan data &mdash; Syft / Grype / Grant &mdash; {{.GeneratedAt}}
 </footer>

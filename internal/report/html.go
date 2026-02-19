@@ -43,6 +43,8 @@ type htmlData struct {
 
 	DeniedTotal int
 	DeniedPkgs  []deniedRow
+
+	Components []componentRow
 }
 
 type vulnRow struct {
@@ -58,6 +60,13 @@ type deniedRow struct {
 	Name     string
 	Version  string
 	Licenses string
+}
+
+type componentRow struct {
+	Name      string
+	Version   string
+	Ecosystem string
+	Locations string
 }
 
 // GenerateHTML produces the HTML summary dashboard.
@@ -132,6 +141,20 @@ func GenerateHTML(result *model.ScanResult, prefix, outDir, generatedAt string) 
 			Name:     name,
 			Version:  version,
 			Licenses: licenses,
+		})
+	}
+
+	// Component inventory with source locations
+	for _, c := range result.SBOM.Components {
+		loc := strings.Join(c.Locations, ", ")
+		if loc == "" {
+			loc = "-"
+		}
+		data.Components = append(data.Components, componentRow{
+			Name:      c.Name,
+			Version:   c.Version,
+			Ecosystem: extractPURLScheme(c.PURL),
+			Locations: loc,
 		})
 	}
 

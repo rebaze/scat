@@ -10,10 +10,11 @@ type SBOM struct {
 }
 
 type Component struct {
-	Name    string `json:"name"`
-	Version string `json:"version"`
-	Type    string `json:"type"`
-	PURL    string `json:"purl"`
+	Name      string   `json:"name"`
+	Version   string   `json:"version"`
+	Type      string   `json:"type"`
+	PURL      string   `json:"purl"`
+	Locations []string `json:"-"` // populated from CycloneDX syft:location properties
 }
 
 // Grype vulnerability report

@@ -99,7 +99,7 @@ func runAnalyze(cmd *cobra.Command, args []string) error {
 				if err := scan.CheckLicenses(sbomPath, licensePath, verbose); err != nil {
 					return err
 				}
-				sbom, err := scan.LoadJSON[model.SBOM](sbomPath)
+				sbom, err := scan.LoadSBOM(sbomPath)
 				if err != nil {
 					return fmt.Errorf("parsing SBOM: %w", err)
 				}
