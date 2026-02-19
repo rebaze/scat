@@ -1,40 +1,62 @@
 # scat
 
-A Software Composition Analysis (SCA) toolchain. It generates a CycloneDX SBOM from a source directory, scans for known vulnerabilities, checks license compliance, and produces reports in JSON, Markdown, and HTML.
+[![CI](https://github.com/rebaze/scat/actions/workflows/ci.yaml/badge.svg)](https://github.com/rebaze/scat/actions/workflows/ci.yaml)
+[![Release](https://github.com/rebaze/scat/actions/workflows/release.yaml/badge.svg)](https://github.com/rebaze/scat/actions/workflows/release.yaml)
+[![GitHub Release](https://img.shields.io/github/v/release/rebaze/scat)](https://github.com/rebaze/scat/releases/latest)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
+[![Go](https://img.shields.io/github/go-mod/go-version/rebaze/scat)](go.mod)
 
-## scat CLI
+**One command. Full software composition analysis.**
 
-`scat` is a single Go binary that runs the full pipeline in one command.
+A self-contained CLI that generates a CycloneDX SBOM, scans for vulnerabilities, checks license compliance, and produces a polished HTML dashboard — all from a single binary.
 
-### Installation
+## Features
 
-**From source:**
+- **CycloneDX SBOM** — industry-standard software bill of materials
+- **Vulnerability scanning** — matches packages against known CVEs with severity scoring
+- **License compliance** — detects and evaluates open-source licenses
+- **HTML dashboard** — interactive report with severity bars, risk heatmap, and print-friendly layout
+- **Single binary** — no external tools required on PATH; Syft, Grype, and license checking are embedded as Go libraries
+- **Multiple output formats** — JSON, Markdown, and HTML in one run
+
+## Installation
+
+### Homebrew (recommended)
 
 ```bash
-go build -o scat .
+brew install rebaze/tap/scat
 ```
 
-**With Go install:**
+### Go install
 
 ```bash
 go install github.com/rebaze/scat@latest
 ```
 
-### Usage
+### From source
 
 ```bash
-# Full pipeline: scan → JSON → Markdown → HTML
-scat analyze /path/to/my-project
-
-# Output only JSON artifacts
-scat analyze /path/to/my-project --format json
-
-# Custom output directory
-scat analyze /path/to/my-project -o ./reports
-
-# Print version
-scat version
+git clone https://github.com/rebaze/scat.git
+cd scat
+go build -o scat .
 ```
+
+## Quick Start
+
+```bash
+scat analyze /path/to/my-project
+```
+
+This runs the full pipeline and writes JSON data files, Markdown reports, and an HTML dashboard to the current directory. Open `my-project-summary.html` in a browser to explore results.
+
+## CLI Reference
+
+### Commands
+
+| Command | Description |
+|---------|-------------|
+| `scat analyze <folder>` | Run the full scan-and-report pipeline |
+| `scat version` | Print version information |
 
 ### Flags
 
@@ -45,7 +67,7 @@ scat version
 | `--verbose` | `-v` | `false` | Verbose output |
 | `--quiet` | `-q` | `false` | Suppress non-error output |
 
-### Output Files
+## Output Files
 
 For a project named `my-project`, `scat analyze` produces:
 
@@ -69,7 +91,7 @@ For a project named `my-project`, `scat analyze` produces:
        │
        ├── <prefix>-sbom.json        (CycloneDX SBOM via Syft)
        ├── <prefix>-vulns.json       (vulnerability matches via Grype)
-       ├── <prefix>-licenses.json    (license evaluation via Grant)
+       ├── <prefix>-licenses.json    (license evaluation)
        │
        ├── <prefix>-report-sbom.md
        ├── <prefix>-report-vulns.md
@@ -78,13 +100,6 @@ For a project named `my-project`, `scat analyze` produces:
        └── <prefix>-summary.html     (HTML dashboard)
 ```
 
-## Prerequisites
+## License
 
-The following tools must be available on `PATH`:
-
-| Tool | Purpose |
-|------|---------|
-| [Syft](https://github.com/anchore/syft) | SBOM generation |
-| [Grype](https://github.com/anchore/grype) | Vulnerability scanning |
-| [Grant](https://github.com/anchore/grant) | License compliance |
-
+[Apache-2.0](LICENSE)
