@@ -1,4 +1,4 @@
-# starter-sbom-toolchain
+# scat
 
 A Software Composition Analysis (SCA) toolchain. It generates a CycloneDX SBOM from a source directory, scans for known vulnerabilities, checks license compliance, and produces reports in JSON, Markdown, and HTML.
 
@@ -17,7 +17,7 @@ go build -o scat .
 **With Go install:**
 
 ```bash
-go install github.com/rebaze/starter-sbom-toolchain@latest
+go install github.com/rebaze/scat@latest
 ```
 
 ### Usage
@@ -88,17 +88,3 @@ The following tools must be available on `PATH`:
 | [Grype](https://github.com/anchore/grype) | Vulnerability scanning |
 | [Grant](https://github.com/anchore/grant) | License compliance |
 
-## Shell Scripts (legacy)
-
-The original shell scripts are available in `scripts/` for reference:
-
-```bash
-# Scan
-./scripts/sbom-scan.sh ./my-project
-
-# Reports
-./scripts/sbom-report.sh my-project
-./scripts/sbom-summary.sh my-project
-```
-
-These require `jq` in addition to Syft, Grype, and Grant.

@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/rebaze/starter-sbom-toolchain/internal/model"
+	"github.com/rebaze/scat/internal/model"
 )
 
 // RunPipeline executes the full scan pipeline: Syft → Grype → Grant.

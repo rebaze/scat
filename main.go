@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/rebaze/starter-sbom-toolchain/cmd"
+	"github.com/rebaze/scat/cmd"
 )
 
 func main() {

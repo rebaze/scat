@@ -16,9 +16,9 @@ builds:
       - arm64
     ldflags:
       - -s -w
-      - -X github.com/rebaze/starter-sbom-toolchain/cmd.version={{.Version}}
-      - -X github.com/rebaze/starter-sbom-toolchain/cmd.commit={{.Commit}}
-      - -X github.com/rebaze/starter-sbom-toolchain/cmd.date={{.Date}}
+      - -X github.com/rebaze/scat/cmd.version={{.Version}}
+      - -X github.com/rebaze/scat/cmd.commit={{.Commit}}
+      - -X github.com/rebaze/scat/cmd.date={{.Date}}
 
 archives:
   - format: tar.gz
@@ -42,7 +42,7 @@ brews:
   - repository:
       owner: rebaze
       name: homebrew-tap
-    homepage: https://github.com/rebaze/starter-sbom-toolchain
+    homepage: https://github.com/rebaze/scat
     description: Software Composition Analysis CLI — SBOM, vulnerability, and license scanning
     license: Apache-2.0
     install: |

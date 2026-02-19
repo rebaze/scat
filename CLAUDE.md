@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A Software Composition Analysis (SCA) toolchain. The `scat` Go CLI generates SBOMs, scans for vulnerabilities, checks licenses, and produces reports in JSON, Markdown, and HTML formats. Original bash scripts are preserved in `scripts/` for reference.
+A Software Composition Analysis (SCA) toolchain. The `scat` Go CLI generates SBOMs, scans for vulnerabilities, checks licenses, and produces reports in JSON, Markdown, and HTML formats.
 
 ## Repository Layout
 
@@ -21,7 +21,6 @@ internal/
     templates/                  go:embed HTML template
   output/                       JSON writer and file helpers
 .goreleaser.yaml                Cross-platform builds + Homebrew tap
-scripts/                        Legacy bash scripts
 .github/workflows/              CI + Release pipelines
 ```
 

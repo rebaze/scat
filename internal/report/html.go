@@ -9,7 +9,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/rebaze/starter-sbom-toolchain/internal/model"
+	"github.com/rebaze/scat/internal/model"
 )
 
 //go:embed templates/summary.html.tmpl
