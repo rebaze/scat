@@ -6,9 +6,9 @@
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![Go](https://img.shields.io/github/go-mod/go-version/rebaze/scat)](go.mod)
 
-**One command. Full software composition analysis.**
+**Software Composition Analysis Tool** — that's what scat stands for.
 
-A self-contained CLI that generates a CycloneDX SBOM, scans for vulnerabilities, checks license compliance, and produces a polished HTML dashboard — all from a single binary.
+An opinionated, self-contained CLI that answers the questions that matter: what's in your software, what's vulnerable, and what are the license obligations? One command, one HTML dashboard — not a pile of artifacts you need another tool to interpret.
 
 ## Features
 
