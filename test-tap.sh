@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-docker run --rm -it ubuntu:24.04 bash -c '
+OUTPUT_DIR=$(mktemp -d)
+
+docker run --rm -it -v "$OUTPUT_DIR:/output" ubuntu:24.04 bash -c '
 set -euo pipefail
 
 apt-get update && apt-get install -y curl git
@@ -15,4 +17,11 @@ brew install rebaze/tap/scat
 
 # Verify
 scat version
+
+# Clone a small Go project and scan it
+git clone --depth 1 https://github.com/spf13/cobra /tmp/cobra
+scat analyze --output-dir /output /tmp/cobra
 '
+
+echo "Reports written to: $OUTPUT_DIR"
+open "$OUTPUT_DIR"/cobra-summary.html
