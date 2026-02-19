@@ -9,19 +9,18 @@ A Software Composition Analysis (SCA) toolchain. The `sca-tool` Go CLI generates
 ## Repository Layout
 
 ```
-sca-tool/                       ← Go CLI (main deliverable)
-  main.go                       Entry point
-  cmd/                          Cobra CLI commands
-    root.go                     Global flags (--output-dir, --format, --verbose, --quiet)
-    analyze.go                  Full pipeline command
-    version.go                  Version from ldflags
-  internal/
-    scan/                       Pipeline orchestration (calls syft/grype/grant)
-    model/                      Data types (SBOM, VulnReport, LicenseReport, RiskScore)
-    report/                     Markdown + HTML report generation
-      templates/                go:embed HTML template
-    output/                     JSON writer and file helpers
-  .goreleaser.yaml              Cross-platform builds + Homebrew tap
+main.go                         Entry point
+cmd/                            Cobra CLI commands
+  root.go                       Global flags (--output-dir, --format, --verbose, --quiet)
+  analyze.go                    Full pipeline command
+  version.go                    Version from ldflags
+internal/
+  scan/                         Pipeline orchestration (calls syft/grype/grant)
+  model/                        Data types (SBOM, VulnReport, LicenseReport, RiskScore)
+  report/                       Markdown + HTML report generation
+    templates/                  go:embed HTML template
+  output/                       JSON writer and file helpers
+.goreleaser.yaml                Cross-platform builds + Homebrew tap
 scripts/                        Legacy bash scripts
 .github/workflows/              CI + Release pipelines
 ```
@@ -29,7 +28,6 @@ scripts/                        Legacy bash scripts
 ## Build & Run
 
 ```bash
-cd sca-tool
 go build -o sca-tool .
 ./sca-tool analyze <folder>
 ./sca-tool version

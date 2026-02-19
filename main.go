@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/rebaze/starter-sbom-toolchain/sca-tool/cmd"
+	"github.com/rebaze/starter-sbom-toolchain/cmd"
 )
 
 func main() {

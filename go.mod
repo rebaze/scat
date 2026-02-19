@@ -1,4 +1,4 @@
-module github.com/rebaze/starter-sbom-toolchain/sca-tool
+module github.com/rebaze/starter-sbom-toolchain
 
 go 1.25.7
 

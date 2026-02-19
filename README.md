@@ -11,14 +11,13 @@ A Software Composition Analysis (SCA) toolchain. It generates a CycloneDX SBOM f
 **From source:**
 
 ```bash
-cd sca-tool
 go build -o sca-tool .
 ```
 
 **With Go install:**
 
 ```bash
-go install github.com/rebaze/starter-sbom-toolchain/sca-tool@latest
+go install github.com/rebaze/starter-sbom-toolchain@latest
 ```
 
 ### Usage

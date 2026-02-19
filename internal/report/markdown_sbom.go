@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/rebaze/starter-sbom-toolchain/sca-tool/internal/model"
+	"github.com/rebaze/starter-sbom-toolchain/internal/model"
 )
 
 func generateSBOMReport(sbom *model.SBOM, outPath, prefix, generatedAt string) error {

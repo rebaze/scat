@@ -3,7 +3,7 @@ package report
 import (
 	"path/filepath"
 
-	"github.com/rebaze/starter-sbom-toolchain/sca-tool/internal/model"
+	"github.com/rebaze/starter-sbom-toolchain/internal/model"
 )
 
 // GenerateMarkdown produces all three markdown report files.

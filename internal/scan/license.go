@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/rebaze/starter-sbom-toolchain/sca-tool/internal/model"
-	"github.com/rebaze/starter-sbom-toolchain/sca-tool/internal/output"
+	"github.com/rebaze/starter-sbom-toolchain/internal/model"
+	"github.com/rebaze/starter-sbom-toolchain/internal/output"
 )
 
 // cycloneDX types used only for license extraction from the SBOM JSON.

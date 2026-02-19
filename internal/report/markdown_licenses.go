@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/rebaze/starter-sbom-toolchain/sca-tool/internal/model"
+	"github.com/rebaze/starter-sbom-toolchain/internal/model"
 )
 
 func generateLicenseReport(lic *model.LicenseReport, outPath, prefix, generatedAt string) error {

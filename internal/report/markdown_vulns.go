@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/rebaze/starter-sbom-toolchain/sca-tool/internal/model"
+	"github.com/rebaze/starter-sbom-toolchain/internal/model"
 )
 
 func generateVulnReport(vulns *model.VulnReport, outPath, prefix, generatedAt string) error {

@@ -13,8 +13,8 @@ import (
 	"github.com/anchore/grype/grype/matcher"
 	grypePkg "github.com/anchore/grype/grype/pkg"
 	"github.com/anchore/grype/grype/vulnerability"
-	"github.com/rebaze/starter-sbom-toolchain/sca-tool/internal/model"
-	"github.com/rebaze/starter-sbom-toolchain/sca-tool/internal/output"
+	"github.com/rebaze/starter-sbom-toolchain/internal/model"
+	"github.com/rebaze/starter-sbom-toolchain/internal/output"
 )
 
 // DBCacheDir returns the path to the Grype vulnerability database cache.

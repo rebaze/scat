@@ -7,11 +7,11 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/rebaze/starter-sbom-toolchain/sca-tool/internal/model"
-	"github.com/rebaze/starter-sbom-toolchain/sca-tool/internal/output"
-	"github.com/rebaze/starter-sbom-toolchain/sca-tool/internal/report"
-	"github.com/rebaze/starter-sbom-toolchain/sca-tool/internal/scan"
-	"github.com/rebaze/starter-sbom-toolchain/sca-tool/internal/tui"
+	"github.com/rebaze/starter-sbom-toolchain/internal/model"
+	"github.com/rebaze/starter-sbom-toolchain/internal/output"
+	"github.com/rebaze/starter-sbom-toolchain/internal/report"
+	"github.com/rebaze/starter-sbom-toolchain/internal/scan"
+	"github.com/rebaze/starter-sbom-toolchain/internal/tui"
 	"github.com/spf13/cobra"
 )
 

@@ -11,9 +11,6 @@ permissions:
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: sca-tool
     steps:
       - uses: actions/checkout@v4
         with:
@@ -28,6 +25,5 @@ jobs:
         with:
           version: "~> v2"
           args: release --clean
-          workdir: sca-tool
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
