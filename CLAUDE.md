@@ -10,16 +10,18 @@ A Software Composition Analysis (SCA) toolchain. The `scat` Go CLI generates SBO
 
 ```
 main.go                         Entry point
+Makefile                        Build helpers (build, run, vet, tidy, clean)
 cmd/                            Cobra CLI commands
   root.go                       Global flags (--output-dir, --format, --verbose, --quiet)
-  analyze.go                    Full pipeline command
+  analyze.go                    Full pipeline command (--clear-cache flag)
   version.go                    Version from ldflags
 internal/
   scan/                         Pipeline orchestration (uses syft/grype Go libraries)
-  model/                        Data types (SBOM, VulnReport, LicenseReport, RiskScore)
+  model/                        Data types (SBOM, VulnReport, LicenseReport, RiskLevel)
   report/                       Markdown + HTML report generation
     templates/                  go:embed HTML template
   output/                       JSON writer and file helpers
+  tui/                          Bubble Tea progress bar for pipeline steps
 .goreleaser.yaml                Cross-platform builds + Homebrew tap
 .github/workflows/              CI + Release pipelines
 ```
@@ -27,8 +29,9 @@ internal/
 ## Build & Run
 
 ```bash
-go build -o scat .
+go build -o scat .              # or: make build (injects version via ldflags)
 ./scat analyze <folder>
+./scat analyze --clear-cache <folder>   # re-download Grype vulnerability DB
 ./scat version
 ```
 
@@ -46,7 +49,8 @@ The `<prefix>` is derived from the scanned folder's basename.
 
 The scan phase uses these Go libraries (no external tools required on PATH):
 - **github.com/anchore/syft** — SBOM generation
-- **github.com/anchore/grype** — Vulnerability scanning (DB cached in `~/.cache/scat/grype-db`)
+- **github.com/anchore/grype** — Vulnerability scanning (DB cached in `<UserCacheDir>/scat/grype-db`, e.g. `~/.cache` on Linux)
+- **github.com/charmbracelet/bubbletea** + **bubbles** — TUI progress bar during pipeline execution
 - License checking is a pure Go implementation (no external dependency)
 
 The binary is fully self-contained.
