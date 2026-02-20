@@ -38,7 +38,7 @@ go install github.com/rebaze/scat@latest
 ```bash
 git clone https://github.com/rebaze/scat.git
 cd scat
-go build -o scat .
+make build    # injects version, commit, and build date via ldflags
 ```
 
 ## Quick Start
@@ -58,7 +58,7 @@ This runs the full pipeline and writes JSON data files, Markdown reports, and an
 | `scat analyze <folder>` | Run the full scan-and-report pipeline |
 | `scat version` | Print version information |
 
-### Flags
+### Global Flags
 
 | Flag | Short | Default | Description |
 |------|-------|---------|-------------|
@@ -66,6 +66,12 @@ This runs the full pipeline and writes JSON data files, Markdown reports, and an
 | `--format` | `-f` | `all` | Output format: `json`, `markdown`, `html`, `all` |
 | `--verbose` | `-v` | `false` | Verbose output |
 | `--quiet` | `-q` | `false` | Suppress non-error output |
+
+### Analyze Flags
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--clear-cache` | `false` | Delete the cached Grype vulnerability database before scanning |
 
 ## Output Files
 
