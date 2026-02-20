@@ -64,6 +64,18 @@ The binary is fully self-contained.
 - Output files written to `--output-dir` (default: current directory)
 - Version injected via ldflags at build time
 
+## Task Tracking
+
+Task files live in the `tasks/` directory. Each file follows this convention:
+
+- **Naming**: `SCAT_NNN.md` with a zero-padded three-digit number (e.g., `SCAT_001.md`, `SCAT_012.md`)
+- **First line**: Heading 1 (`#`) with the task title
+- **Second line**: Empty
+- **Third line**: `Status: OPEN` or `Status: CLOSED` — these are the only valid values
+- **Remainder**: Free-form markdown describing the task (summary, motivation, scope, implementation notes, etc.)
+
+When completing a task, change its status from `OPEN` to `CLOSED`. Never delete task files.
+
 ## Release Rules
 
 - **NEVER delete tags** — tags are immutable, even if a release is broken
