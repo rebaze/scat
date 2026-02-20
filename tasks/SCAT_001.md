@@ -35,10 +35,20 @@ ignore:
     reason: "Not reachable in our usage"
 ```
 
+## Design Decision: Policy Format
+
+We considered using an established policy standard such as OPA/Rego or CEL instead of a custom YAML format. Trade-offs:
+
+- **OPA/Rego**: Industry standard, highly expressive, but adds a heavy Go dependency, increases binary size, and has a steep learning curve for simple use cases (e.g., "block GPL, fail on critical").
+- **CEL (Common Expression Language)**: Lighter than Rego, used by Kubernetes, but still an extra dependency and added complexity for straightforward threshold-based policies.
+- **CycloneDX Policy**: Draft-stage work in the CycloneDX ecosystem; not mature enough to adopt yet.
+
+**Decision**: Start with the simple declarative YAML format described above. It covers the majority of real-world use cases with zero learning curve. However, the internal policy evaluation should be designed behind a clean interface (`internal/policy/`) so that an OPA or CEL backend can be added later without changing the model or CLI surface.
+
 ## Implementation Notes
 
 - New `internal/config/` package to load and validate `.scat.yaml`.
-- New `internal/policy/` package to evaluate scan results against config.
+- New `internal/policy/` package to evaluate scan results against config. Design as an interface so alternative backends (OPA, CEL) can be plugged in later.
 - `cmd/analyze.go` wires policy evaluation after scan, sets exit code.
 - Dashboard and markdown reports should indicate policy pass/fail status.
 - When no `.scat.yaml` is present, behaviour remains unchanged (exit 0, permissive).
