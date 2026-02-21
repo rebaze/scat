@@ -30,6 +30,19 @@ func generateVulnReport(vulns *model.VulnReport, outPath, prefix, generatedAt st
 	b.WriteString(fmt.Sprintf("| Unknown | %d |\n", counts.Unknown))
 	b.WriteString(fmt.Sprintf("| **Total** | %d |\n\n", counts.Total))
 
+	// Exploit intelligence summary
+	kevCount, highEPSSCount := countExploitIntelligence(vulns)
+	if kevCount > 0 || highEPSSCount > 0 {
+		b.WriteString("## Exploit Intelligence\n\n")
+		if kevCount > 0 {
+			b.WriteString(fmt.Sprintf("- **CISA KEV:** %d vulnerabilit%s actively exploited in the wild\n", kevCount, pluralSuffix(kevCount)))
+		}
+		if highEPSSCount > 0 {
+			b.WriteString(fmt.Sprintf("- **High EPSS:** %d vulnerabilit%s with exploit probability >= 70%%\n", highEPSSCount, pluralSuffix(highEPSSCount)))
+		}
+		b.WriteString("\n")
+	}
+
 	// Vulnerabilities by Severity
 	b.WriteString("## Vulnerabilities by Severity\n\n")
 
@@ -49,6 +62,21 @@ func generateVulnReport(vulns *model.VulnReport, outPath, prefix, generatedAt st
 		}
 		b.WriteString(fmt.Sprintf("- **Fix available:** %s\n", fixState))
 
+		if m.Vulnerability.EPSS != nil {
+			b.WriteString(fmt.Sprintf("- **EPSS score:** %.1f%%", *m.Vulnerability.EPSS*100))
+			if m.Vulnerability.EPSSPercentile != nil {
+				b.WriteString(fmt.Sprintf(" (percentile: %.1f%%)", *m.Vulnerability.EPSSPercentile*100))
+			}
+			b.WriteString("\n")
+		}
+
+		if m.Vulnerability.InKEV {
+			b.WriteString("- **CISA KEV:** Yes — actively exploited in the wild\n")
+			if m.Vulnerability.KEVDueDate != "" {
+				b.WriteString(fmt.Sprintf("- **KEV due date:** %s\n", m.Vulnerability.KEVDueDate))
+			}
+		}
+
 		desc := m.Vulnerability.Description
 		if desc == "" {
 			desc = "n/a"
@@ -64,6 +92,25 @@ func generateVulnReport(vulns *model.VulnReport, outPath, prefix, generatedAt st
 	}
 
 	return os.WriteFile(outPath, []byte(b.String()), 0o644)
+}
+
+func countExploitIntelligence(vulns *model.VulnReport) (kevCount, highEPSSCount int) {
+	for _, m := range vulns.Matches {
+		if m.Vulnerability.InKEV {
+			kevCount++
+		}
+		if m.Vulnerability.EPSS != nil && *m.Vulnerability.EPSS >= 0.7 {
+			highEPSSCount++
+		}
+	}
+	return
+}
+
+func pluralSuffix(n int) string {
+	if n == 1 {
+		return "y"
+	}
+	return "ies"
 }
 
 func severityOrder(sev string) int {

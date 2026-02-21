@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/anchore/clio"
 	"github.com/anchore/grype/grype"
@@ -86,11 +87,20 @@ func convertGrypeMatches(matches *grypeMatch.Matches) model.VulnReport {
 			severity = m.Vulnerability.Metadata.Severity
 			dataSource = m.Vulnerability.Metadata.DataSource
 		}
+
+		var relatedCVEs []string
+		for _, ref := range m.Vulnerability.RelatedVulnerabilities {
+			if strings.HasPrefix(ref.ID, "CVE-") {
+				relatedCVEs = append(relatedCVEs, ref.ID)
+			}
+		}
+
 		report.Matches = append(report.Matches, model.Match{
 			Vulnerability: model.Vulnerability{
-				ID:         m.Vulnerability.ID,
-				Severity:   severity,
-				DataSource: dataSource,
+				ID:          m.Vulnerability.ID,
+				Severity:    severity,
+				DataSource:  dataSource,
+				RelatedCVEs: relatedCVEs,
 				Fix: model.VulnFix{
 					State: string(m.Vulnerability.Fix.State),
 				},

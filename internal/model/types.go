@@ -29,11 +29,19 @@ type Match struct {
 }
 
 type Vulnerability struct {
-	ID          string  `json:"id"`
-	Severity    string  `json:"severity"`
-	Description string  `json:"description"`
-	DataSource  string  `json:"dataSource"`
-	Fix         VulnFix `json:"fix"`
+	ID          string   `json:"id"`
+	Severity    string   `json:"severity"`
+	Description string   `json:"description"`
+	DataSource  string   `json:"dataSource"`
+	RelatedCVEs []string `json:"relatedCVEs,omitempty"` // CVE IDs from Grype RelatedVulnerabilities
+	Fix         VulnFix  `json:"fix"`
+
+	// Enrichment fields (populated by enrich package)
+	EPSS              *float64 `json:"epss,omitempty"`
+	EPSSPercentile    *float64 `json:"epssPercentile,omitempty"`
+	InKEV             bool     `json:"inKEV,omitempty"`
+	KEVDueDate        string   `json:"kevDueDate,omitempty"`
+	KEVRequiredAction string   `json:"kevRequiredAction,omitempty"`
 }
 
 type VulnFix struct {
@@ -111,6 +119,9 @@ type ScanResult struct {
 	SBOMPath    string
 	VulnPath    string
 	LicensePath string
+
+	EPSSAvailable bool
+	KEVAvailable  bool
 }
 
 // Severity counts for reporting
@@ -154,13 +165,64 @@ type RiskLevel struct {
 	Color string
 }
 
-func ComputeRisk(counts SeverityCounts) RiskLevel {
+func ComputeRisk(counts SeverityCounts, vulns *VulnReport) RiskLevel {
+	// Base heuristic from severity counts
+	base := riskLabel(counts)
+
+	// Escalate based on EPSS/KEV enrichment
+	if vulns != nil {
+		for _, m := range vulns.Matches {
+			sev := m.Vulnerability.Severity
+			if sev != "Critical" && sev != "High" && sev != "Medium" {
+				continue
+			}
+			// KEV vuln with severity >= Medium escalates to at least High
+			if m.Vulnerability.InKEV && riskOrd(base) > riskOrd("High") {
+				base = "High"
+			}
+			// EPSS >= 0.7 with severity >= Medium escalates to at least High
+			if m.Vulnerability.EPSS != nil && *m.Vulnerability.EPSS >= 0.7 && riskOrd(base) > riskOrd("High") {
+				base = "High"
+			}
+		}
+	}
+
+	return riskLevelFromLabel(base)
+}
+
+func riskLabel(counts SeverityCounts) string {
 	switch {
 	case counts.Critical > 0:
-		return RiskLevel{Label: "Critical", Color: "#c0392b"}
+		return "Critical"
 	case counts.High > 0:
-		return RiskLevel{Label: "High", Color: "#e67e22"}
+		return "High"
 	case counts.Medium > 5:
+		return "Medium"
+	default:
+		return "Low"
+	}
+}
+
+func riskOrd(label string) int {
+	switch label {
+	case "Critical":
+		return 0
+	case "High":
+		return 1
+	case "Medium":
+		return 2
+	default:
+		return 3
+	}
+}
+
+func riskLevelFromLabel(label string) RiskLevel {
+	switch label {
+	case "Critical":
+		return RiskLevel{Label: "Critical", Color: "#c0392b"}
+	case "High":
+		return RiskLevel{Label: "High", Color: "#e67e22"}
+	case "Medium":
 		return RiskLevel{Label: "Medium", Color: "#f39c12"}
 	default:
 		return RiskLevel{Label: "Low", Color: "#2d8a4e"}

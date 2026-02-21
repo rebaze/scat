@@ -7,6 +7,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/rebaze/scat/internal/enrich"
 	"github.com/rebaze/scat/internal/model"
 	"github.com/rebaze/scat/internal/output"
 	"github.com/rebaze/scat/internal/report"
@@ -57,6 +58,9 @@ func runAnalyze(cmd *cobra.Command, args []string) error {
 		}
 		if err := os.RemoveAll(cacheDir); err != nil {
 			return fmt.Errorf("clearing cache: %w", err)
+		}
+		if err := enrich.ClearCache(); err != nil {
+			return fmt.Errorf("clearing enrichment cache: %w", err)
 		}
 	}
 
@@ -120,6 +124,21 @@ func runAnalyze(cmd *cobra.Command, args []string) error {
 					LicensePath: licensePath,
 				}
 				generatedAt = time.Now().UTC().Format("2006-01-02 15:04:05 UTC")
+				return nil
+			},
+		},
+		{
+			Name: "Enriching with exploit intelligence",
+			Run: func() error {
+				er := enrich.Enrich(result.Vulns)
+				result.EPSSAvailable = er.EPSSAvailable
+				result.KEVAvailable = er.KEVAvailable
+				// Re-write enriched vulns JSON
+				if er.EPSSAvailable || er.KEVAvailable {
+					if err := output.WriteJSON(vulnPath, result.Vulns); err != nil {
+						return fmt.Errorf("writing enriched vulns: %w", err)
+					}
+				}
 				return nil
 			},
 		},

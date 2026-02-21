@@ -32,6 +32,11 @@ type htmlData struct {
 
 	AllVulns []vulnRow
 
+	// Enrichment
+	EPSSAvailable bool
+	KEVAvailable  bool
+	KEVCount      int
+
 	// License summary
 	LicDenied     int
 	LicUnlicensed int
@@ -55,6 +60,10 @@ type vulnRow struct {
 	Package  string
 	Version  string
 	Fix      string
+	EPSS     string  // formatted display string
+	EPSSRaw  float64 // raw value for sorting
+	InKEV    bool
+	KEVDueDate string
 }
 
 type deniedRow struct {
@@ -75,7 +84,7 @@ func GenerateHTML(result *model.ScanResult, prefix, outDir, generatedAt string) 
 	outPath := filepath.Join(outDir, prefix+"-summary.html")
 
 	sev := result.Vulns.CountSeverities()
-	risk := model.ComputeRisk(sev)
+	risk := model.ComputeRisk(sev, result.Vulns)
 
 	// Combine Negligible + Unknown to match bash script behavior
 	negligibleTotal := sev.Negligible + sev.Unknown
@@ -98,8 +107,19 @@ func GenerateHTML(result *model.ScanResult, prefix, outDir, generatedAt string) 
 		data.PctNegligible = pct(negligibleTotal, sev.Total)
 	}
 
+	// Enrichment flags
+	data.EPSSAvailable = result.EPSSAvailable
+	data.KEVAvailable = result.KEVAvailable
+
 	// All vulns table
 	data.AllVulns = buildAllVulns(result.Vulns)
+
+	// Count KEV entries
+	for _, row := range data.AllVulns {
+		if row.InKEV {
+			data.KEVCount++
+		}
+	}
 
 	// License summary (from first target)
 	if len(result.License.Run.Targets) > 0 {
@@ -199,7 +219,7 @@ func buildAllVulns(vulns *model.VulnReport) []vulnRow {
 		if version == "" {
 			version = "-"
 		}
-		rows = append(rows, vulnRow{
+		row := vulnRow{
 			ID:       m.Vulnerability.ID,
 			Severity: sev,
 			SevClass: strings.ToLower(sev),
@@ -207,7 +227,14 @@ func buildAllVulns(vulns *model.VulnReport) []vulnRow {
 			Package:  m.Artifact.Name,
 			Version:  version,
 			Fix:      fix,
-		})
+			InKEV:    m.Vulnerability.InKEV,
+			KEVDueDate: m.Vulnerability.KEVDueDate,
+		}
+		if m.Vulnerability.EPSS != nil {
+			row.EPSSRaw = *m.Vulnerability.EPSS
+			row.EPSS = fmt.Sprintf("%.1f%%", *m.Vulnerability.EPSS*100)
+		}
+		rows = append(rows, row)
 	}
 	sort.Slice(rows, func(i, j int) bool {
 		return severityOrder(rows[i].Severity) < severityOrder(rows[j].Severity)

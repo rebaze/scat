@@ -235,6 +235,19 @@
   .sev-pill-negligible  { background: var(--negligible); }
   .sev-pill-unknown     { background: var(--unknown); }
 
+  /* KEV badge */
+  .kev-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 12px;
+    background: var(--critical);
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
   /* Vuln filter buttons */
   .vuln-filters {
     display: flex;
@@ -465,7 +478,7 @@
   <div class="card">
     <div class="label">Vulnerabilities</div>
     <div class="value">{{.Sev.Total}}</div>
-    <div class="sub">{{.Sev.Critical}} critical, {{.Sev.High}} high</div>
+    <div class="sub">{{.Sev.Critical}} critical, {{.Sev.High}} high{{if and .KEVAvailable (gt .KEVCount 0)}}, {{.KEVCount}} in CISA KEV{{end}}</div>
   </div>
   <div class="card">
     <div class="label">License Issues</div>
@@ -517,15 +530,27 @@
       <th class="sortable" data-sort="package">Package <span class="sort-icon">&#9650;</span></th>
       <th>Version</th>
       <th>Fix</th>
+{{if .EPSSAvailable}}
+      <th class="sortable" data-sort="epss">EPSS <span class="sort-icon">&#9650;</span></th>
+{{end}}
+{{if .KEVAvailable}}
+      <th>KEV</th>
+{{end}}
     </tr></thead>
     <tbody>
 {{range .AllVulns}}
-      <tr class="sev-{{.SevClass}}" data-sev="{{.SevClass}}" data-sev-order="{{.SevOrder}}">
+      <tr class="sev-{{.SevClass}}" data-sev="{{.SevClass}}" data-sev-order="{{.SevOrder}}" data-epss="{{.EPSSRaw}}">
         <td>{{.ID}}</td>
         <td><span class="sev-pill sev-pill-{{.SevClass}}">{{.Severity}}</span></td>
         <td>{{.Package}}</td>
         <td>{{.Version}}</td>
         <td>{{.Fix}}</td>
+{{if $.EPSSAvailable}}
+        <td>{{if .EPSS}}{{.EPSS}}{{else}}-{{end}}</td>
+{{end}}
+{{if $.KEVAvailable}}
+        <td>{{if .InKEV}}<span class="kev-badge">KEV</span>{{end}}</td>
+{{end}}
       </tr>
 {{end}}
     </tbody>
@@ -677,6 +702,9 @@
         } else if (sortKey === 'package') {
           valA = a.cells[2].textContent.toLowerCase();
           valB = b.cells[2].textContent.toLowerCase();
+        } else if (sortKey === 'epss') {
+          valA = parseFloat(a.getAttribute('data-epss')) || 0;
+          valB = parseFloat(b.getAttribute('data-epss')) || 0;
         }
         var cmp;
         if (typeof valA === 'number') {

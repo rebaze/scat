@@ -1,6 +1,6 @@
 # EPSS and KEV Vulnerability Enrichment
 
-Status: OPEN
+Status: CLOSED
 
 ## Summary
 
