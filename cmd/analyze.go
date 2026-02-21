@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -19,9 +20,9 @@ import (
 var clearCache bool
 
 var analyzeCmd = &cobra.Command{
-	Use:   "analyze <folder>",
+	Use:   "analyze <path>",
 	Short: "Run full SCA pipeline: scan, report, and summarize",
-	Long:  "Scans a source directory for components, vulnerabilities, and license issues, then generates JSON, Markdown, and HTML reports.",
+	Long:  "Scans a source directory or PURL list file for components, vulnerabilities, and license issues, then generates JSON, Markdown, and HTML reports.\nWhen <path> is a directory, components are discovered via Syft.\nWhen <path> is a text file containing Package URLs (one per line), a synthetic SBOM is created from those PURLs.",
 	Args:  cobra.ExactArgs(1),
 	RunE:  runAnalyze,
 }
@@ -32,19 +33,31 @@ func init() {
 }
 
 func runAnalyze(cmd *cobra.Command, args []string) error {
-	folder := args[0]
-
-	info, err := os.Stat(folder)
-	if err != nil || !info.IsDir() {
-		return fmt.Errorf("'%s' is not a directory", folder)
-	}
-
-	absFolder, err := filepath.Abs(folder)
+	target := args[0]
+	info, err := os.Stat(target)
 	if err != nil {
-		return fmt.Errorf("resolving path: %w", err)
+		return fmt.Errorf("cannot access '%s': %w", target, err)
 	}
 
-	prefix := filepath.Base(absFolder)
+	var absFolder string
+	var purlFile string
+	var prefix string
+
+	if info.IsDir() {
+		af, err := filepath.Abs(target)
+		if err != nil {
+			return fmt.Errorf("resolving path: %w", err)
+		}
+		absFolder = af
+		prefix = filepath.Base(absFolder)
+	} else if info.Mode().IsRegular() {
+		purlFile = target
+		base := filepath.Base(purlFile)
+		prefix = strings.TrimSuffix(base, filepath.Ext(base))
+	} else {
+		return fmt.Errorf("'%s' is neither a directory nor a regular file", target)
+	}
+
 	outDir := outputDir
 
 	if err := output.EnsureDir(outDir); err != nil {
@@ -76,13 +89,25 @@ func runAnalyze(cmd *cobra.Command, args []string) error {
 	var generatedAt string
 	var vulnDB *scan.VulnDB
 
-	steps := []tui.Step{
-		{
+	var sbomStep tui.Step
+	if purlFile != "" {
+		sbomStep = tui.Step{
+			Name: "Creating inventory from PURLs",
+			Run: func() error {
+				return scan.CreateSBOMFromPURLs(purlFile, sbomPath)
+			},
+		}
+	} else {
+		sbomStep = tui.Step{
 			Name: "Generating component inventory",
 			Run: func() error {
 				return scan.CreateSBOM(absFolder, sbomPath, verbose)
 			},
-		},
+		}
+	}
+
+	steps := []tui.Step{
+		sbomStep,
 		{
 			Name: "Updating vulnerability database",
 			Run: func() error {
