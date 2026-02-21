@@ -85,6 +85,7 @@
     max-width: 1100px;
     margin: 0 auto;
     padding: var(--space-2xl) 40px;
+    position: relative;
   }
 
   /* Header */
@@ -727,9 +728,9 @@
     box-shadow: 0 0 0 3px var(--accent-ring);
   }
 
-  /* Dark mode */
+  /* Dark mode — auto (OS preference, no explicit choice) */
   @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-theme="light"]) {
       --bg: #0f172a;
       --surface: #1e293b;
       --surface-raised: #334155;
@@ -758,18 +759,99 @@
       --negligible-text: #94a3b8;
     }
 
-    .search-input {
+    :root:not([data-theme="light"]) .search-input {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
     }
 
-    .tag {
+    :root:not([data-theme="light"]) .tag {
       background: var(--surface-sunken);
     }
 
-    .risk-badge {
+    :root:not([data-theme="light"]) .risk-badge {
       text-shadow: none;
     }
   }
+
+  /* Dark mode — manual (explicit toggle) */
+  :root[data-theme="dark"] {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface-raised: #334155;
+    --surface-sunken: #0f172a;
+
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-tertiary: #64748b;
+
+    --accent: #cbd5e1;
+    --accent-light: rgba(203,213,225,0.08);
+    --accent-ring: rgba(203,213,225,0.2);
+
+    --border: #334155;
+    --border-subtle: #1e293b;
+
+    --critical-bg: rgba(220,38,38,0.15);
+    --critical-text: #FCA5A5;
+    --high-bg: rgba(234,88,12,0.15);
+    --high-text: #FDBA74;
+    --medium-bg: rgba(217,119,6,0.15);
+    --medium-text: #FCD34D;
+    --low-bg: rgba(22,163,74,0.15);
+    --low-text: #86EFAC;
+    --negligible-bg: rgba(100,116,139,0.15);
+    --negligible-text: #94a3b8;
+  }
+
+  :root[data-theme="dark"] .search-input {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
+  }
+
+  :root[data-theme="dark"] .tag {
+    background: var(--surface-sunken);
+  }
+
+  :root[data-theme="dark"] .risk-badge {
+    text-shadow: none;
+  }
+
+  /* Theme toggle button */
+  .theme-toggle {
+    position: absolute;
+    top: var(--space-2xl);
+    right: 40px;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+    padding: 0;
+    z-index: 20;
+  }
+
+  .theme-toggle:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  /* Show moon in light mode, sun in dark mode */
+  .theme-toggle .icon-sun  { display: none; }
+  .theme-toggle .icon-moon { display: block; }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .theme-toggle .icon-sun  { display: block; }
+    :root:not([data-theme="light"]) .theme-toggle .icon-moon { display: none; }
+  }
+  :root[data-theme="dark"] .theme-toggle .icon-sun  { display: block; }
+  :root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+  :root[data-theme="light"] .theme-toggle .icon-sun  { display: none; }
+  :root[data-theme="light"] .theme-toggle .icon-moon { display: block; }
 
   /* Print — force light mode */
   @media print {
@@ -791,7 +873,7 @@
     .card { box-shadow: none; border-top-width: 3px; }
     .card:hover { transform: none; }
     tbody tr:hover { background: none; }
-    .vuln-filters, .search-input { display: none; }
+    .vuln-filters, .search-input, .theme-toggle { display: none; }
     .accordion details { box-shadow: none; break-inside: avoid; }
     .sev-pill, .kev-badge, .risk-badge, .sev-bar, .donut-container {
       -webkit-print-color-adjust: exact;
@@ -837,7 +919,15 @@
 </style>
 </head>
 <body>
+<script>
+(function(){var s=localStorage.getItem('scat-theme');if(s)document.documentElement.setAttribute('data-theme',s);})();
+</script>
 <div class="page">
+
+<button class="theme-toggle" aria-label="Toggle dark mode" onclick="toggleTheme()">
+  <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+  <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+</button>
 
 <header>
   <!-- Rebaze hex icon -->
@@ -1229,6 +1319,17 @@
 <footer>
   Powered by <span class="footer-brand">rebaze</span> &mdash; Syft / Grype / Grant &mdash; {{.GeneratedAt}}
 </footer>
+
+<script>
+function toggleTheme() {
+  var current = document.documentElement.getAttribute('data-theme');
+  var isDark = current === 'dark' ||
+    (!current && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  var next = isDark ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('scat-theme', next);
+}
+</script>
 </div>
 </body>
 </html>
