@@ -5,94 +5,167 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Software Composition Analysis — Summary Report</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&family=Source+Code+Pro:wght@400;500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
   :root {
-    --bg: #f7f8fa;
+    /* Brand */
+    --brand-red: #E91E63;
+    --brand-black: #1a1a2e;
+
+    /* Surfaces */
+    --bg: #f4f5f7;
     --surface: #ffffff;
-    --border: #e2e5ea;
-    --text: #1a1d23;
-    --text-secondary: #5a6170;
-    --accent: #2563eb;
-    --critical: #c0392b;
-    --high: #e67e22;
-    --medium: #f39c12;
-    --low: #2d8a4e;
-    --negligible: #8395a7;
-    --unknown: #a0aab4;
+    --surface-raised: #ffffff;
+    --surface-sunken: #eef0f3;
+
+    /* Text */
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --text-tertiary: #94a3b8;
+
+    /* Accent */
+    --accent: #334155;
+    --accent-light: rgba(51,65,85,0.08);
+    --accent-ring: rgba(51,65,85,0.15);
+
+    /* Borders */
+    --border: #e2e8f0;
+    --border-subtle: #f1f5f9;
+
+    /* Severity — Tailwind v3 palette */
+    --critical: #DC2626;
+    --critical-bg: #FEF2F2;
+    --critical-text: #991B1B;
+    --high: #EA580C;
+    --high-bg: #FFF7ED;
+    --high-text: #9A3412;
+    --medium: #D97706;
+    --medium-bg: #FFFBEB;
+    --medium-text: #92400E;
+    --low: #16A34A;
+    --low-bg: #F0FDF4;
+    --low-text: #166534;
+    --negligible: #64748b;
+    --negligible-bg: #F8FAFC;
+    --negligible-text: #475569;
+    --unknown: #94a3b8;
+
+    /* Spacing */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+
+    /* Radius */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: var(--bg);
-    color: var(--text);
+    color: var(--text-primary);
     line-height: 1.6;
     padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   .page {
-    max-width: 1060px;
+    max-width: 1100px;
     margin: 0 auto;
-    padding: 48px 40px;
+    padding: var(--space-2xl) 40px;
   }
 
-  /* Header with gradient accent line */
+  /* Header */
   header {
-    border-bottom: 3px solid transparent;
-    border-image: linear-gradient(90deg, var(--accent), var(--critical), var(--high), var(--medium), var(--low)) 1;
-    padding-bottom: 20px;
-    margin-bottom: 40px;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-md);
+    padding-bottom: var(--space-lg);
+    margin-bottom: var(--space-2xl);
+    border-left: 4px solid var(--brand-red);
+    padding-left: var(--space-lg);
+  }
+
+  .header-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
   }
 
   header h1 {
-    font-size: 28px;
-    font-weight: 700;
+    font-size: 26px;
+    font-weight: 800;
     letter-spacing: -0.5px;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
+    color: var(--text-primary);
   }
 
   header .meta {
     font-size: 14px;
     color: var(--text-secondary);
+    font-weight: 400;
   }
 
-  /* Cards with shadow and hover lift */
+  /* Summary cards */
   .cards {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 40px;
+    gap: var(--space-md);
+    margin-bottom: var(--space-2xl);
   }
 
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px 24px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    border-top: 3px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 20px var(--space-lg);
+    box-shadow: var(--shadow-sm);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
   }
 
   .card:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    box-shadow: var(--shadow-md);
   }
 
+  .card--components { border-top-color: var(--accent); }
+  .card--vulns { border-top-color: var(--critical); }
+  .card--licenses { border-top-color: var(--medium); }
+  .card--risk { border-top-color: var(--low); }
+
   .card .label {
-    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.8px;
     color: var(--text-secondary);
-    margin-bottom: 8px;
+    margin-bottom: var(--space-sm);
+  }
+
+  .card .label svg {
+    flex-shrink: 0;
+    opacity: 0.6;
   }
 
   .card .value {
     font-size: 36px;
-    font-weight: 700;
-    letter-spacing: -1px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
     line-height: 1;
   }
 
@@ -102,32 +175,138 @@
     margin-top: 6px;
   }
 
-  /* Risk badge — larger and bolder */
+  /* Risk badge */
   .risk-badge {
     display: inline-block;
     font-size: 15px;
     font-weight: 700;
     padding: 5px 16px;
-    border-radius: 5px;
+    border-radius: var(--radius-sm);
     color: #fff;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
   }
 
   section {
-    margin-bottom: 40px;
+    margin-bottom: var(--space-2xl);
   }
 
-  /* Section headings — thicker border, tighter letter-spacing */
   h2 {
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 700;
-    margin-bottom: 16px;
-    padding-bottom: 8px;
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
     border-bottom: 2px solid var(--border);
     letter-spacing: -0.3px;
+    color: var(--text-primary);
   }
 
-  /* Tables with zebra striping */
+  /* Donut chart */
+  .donut-container {
+    display: grid;
+    grid-template-columns: auto 1fr 1fr;
+    gap: var(--space-xl);
+    align-items: center;
+    margin-bottom: var(--space-lg);
+    padding: var(--space-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .donut-chart {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+  }
+
+  .donut-svg {
+    flex-shrink: 0;
+  }
+
+  .overview-panel {
+    border-left: 1px solid var(--border);
+    padding-left: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-md);
+  }
+
+  .overview-stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+  }
+
+  .overview-stat-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+
+  .overview-stat-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .fix-bar {
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .fix-bar-fill {
+    height: 100%;
+    background: var(--low);
+    border-radius: 4px;
+  }
+
+  .donut-center {
+    font-family: 'Inter', sans-serif;
+    font-weight: 800;
+    fill: var(--text-primary);
+  }
+
+  .donut-center-label {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 10px;
+    fill: var(--text-secondary);
+  }
+
+  .donut-legend {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .donut-legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .donut-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .donut-legend-count {
+    font-weight: 700;
+    margin-left: auto;
+    min-width: 28px;
+    text-align: right;
+  }
+
+  /* Tables */
   table {
     width: 100%;
     border-collapse: collapse;
@@ -137,78 +316,29 @@
   thead th {
     text-align: left;
     font-weight: 600;
-    font-size: 12px;
+    font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--text-secondary);
     padding: 10px 12px;
     border-bottom: 2px solid var(--border);
-    background: var(--bg);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 10;
   }
 
   tbody td {
-    padding: 9px 12px;
-    border-bottom: 1px solid var(--border);
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-subtle);
     vertical-align: top;
   }
 
   tbody tr:last-child td { border-bottom: none; }
-  tbody tr:nth-child(even) { background: #fafbfc; }
-  tbody tr:hover { background: #edf0f4; }
+  tbody tr { transition: background 0.1s ease; }
+  tbody tr:hover { background: var(--accent-light); }
 
-  /* Severity bar — taller, rounder, inset shadow */
-  .sev-bar {
-    display: flex;
-    height: 32px;
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 12px;
-    background: var(--border);
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.12);
-  }
-
-  .sev-bar > div {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 600;
-    color: #fff;
-    min-width: 2px;
-  }
-
-  .sev-bar .crit { background: var(--critical); }
-  .sev-bar .high { background: var(--high); }
-  .sev-bar .med  { background: var(--medium); color: var(--text); }
-  .sev-bar .low  { background: var(--low); }
-  .sev-bar .neg  { background: var(--negligible); }
-
-  .sev-legend {
-    display: flex;
-    gap: 20px;
-    font-size: 13px;
-    color: var(--text-secondary);
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-  }
-
-  .sev-legend span::before {
-    content: '';
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    border-radius: 2px;
-    margin-right: 6px;
-    vertical-align: middle;
-  }
-
-  .sev-legend .l-crit::before { background: var(--critical); }
-  .sev-legend .l-high::before { background: var(--high); }
-  .sev-legend .l-med::before  { background: var(--medium); }
-  .sev-legend .l-low::before  { background: var(--low); }
-  .sev-legend .l-neg::before  { background: var(--negligible); }
-
-  /* Severity row left-border colors — all levels */
+  /* Severity row left-border colors */
   tr.sev-critical td:first-child    { border-left: 3px solid var(--critical); }
   tr.sev-high td:first-child        { border-left: 3px solid var(--high); }
   tr.sev-medium td:first-child      { border-left: 3px solid var(--medium); }
@@ -216,43 +346,96 @@
   tr.sev-negligible td:first-child  { border-left: 3px solid var(--negligible); }
   tr.sev-unknown td:first-child     { border-left: 3px solid var(--unknown); }
 
-  /* Severity pills */
+  /* Severity pills — tinted backgrounds */
   .sev-pill {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     font-size: 11px;
     font-weight: 700;
-    padding: 2px 10px;
+    padding: 3px 10px;
     border-radius: 12px;
-    color: #fff;
     text-transform: uppercase;
     letter-spacing: 0.3px;
   }
 
-  .sev-pill-critical    { background: var(--critical); }
-  .sev-pill-high        { background: var(--high); }
-  .sev-pill-medium      { background: var(--medium); color: var(--text); }
-  .sev-pill-low         { background: var(--low); }
-  .sev-pill-negligible  { background: var(--negligible); }
-  .sev-pill-unknown     { background: var(--unknown); }
+  .sev-pill::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .sev-pill-critical    { background: var(--critical-bg); color: var(--critical-text); }
+  .sev-pill-critical::before { background: var(--critical); }
+  .sev-pill-high        { background: var(--high-bg); color: var(--high-text); }
+  .sev-pill-high::before { background: var(--high); }
+  .sev-pill-medium      { background: var(--medium-bg); color: var(--medium-text); }
+  .sev-pill-medium::before { background: var(--medium); }
+  .sev-pill-low         { background: var(--low-bg); color: var(--low-text); }
+  .sev-pill-low::before { background: var(--low); }
+  .sev-pill-negligible  { background: var(--negligible-bg); color: var(--negligible-text); }
+  .sev-pill-negligible::before { background: var(--negligible); }
+  .sev-pill-unknown     { background: var(--negligible-bg); color: var(--negligible-text); }
+  .sev-pill-unknown::before { background: var(--unknown); }
 
   /* KEV badge */
   .kev-badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     font-size: 11px;
     font-weight: 700;
-    padding: 2px 10px;
+    padding: 3px 10px;
     border-radius: 12px;
-    background: var(--critical);
-    color: #fff;
+    background: var(--critical-bg);
+    color: var(--critical-text);
     text-transform: uppercase;
     letter-spacing: 0.3px;
   }
 
-  /* Vuln filter buttons */
+  .kev-badge::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--critical);
+  }
+
+  /* EPSS micro-bar */
+  .epss-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .epss-bar {
+    width: 40px;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .epss-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.2s ease;
+  }
+
+  .epss-bar-fill.epss-low { background: var(--low); }
+  .epss-bar-fill.epss-medium { background: var(--medium); }
+  .epss-bar-fill.epss-high { background: var(--critical); }
+
+  /* Vuln filter buttons — pill-shaped */
   .vuln-filters {
     display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
     flex-wrap: wrap;
   }
 
@@ -260,9 +443,9 @@
     font-family: inherit;
     font-size: 13px;
     font-weight: 600;
-    padding: 5px 14px;
+    padding: 6px 16px;
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 20px;
     background: var(--surface);
     color: var(--text-secondary);
     cursor: pointer;
@@ -272,6 +455,12 @@
   .filter-btn:hover {
     border-color: var(--accent);
     color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  .filter-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--accent-ring);
   }
 
   .filter-btn.active {
@@ -280,11 +469,35 @@
     color: #fff;
   }
 
-  .filter-btn.active[data-filter="critical"]   { background: var(--critical); border-color: var(--critical); }
-  .filter-btn.active[data-filter="high"]        { background: var(--high); border-color: var(--high); }
-  .filter-btn.active[data-filter="medium"]      { background: var(--medium); border-color: var(--medium); color: var(--text); }
-  .filter-btn.active[data-filter="low"]         { background: var(--low); border-color: var(--low); }
-  .filter-btn.active[data-filter="other"]       { background: var(--negligible); border-color: var(--negligible); }
+  .filter-btn.active[data-filter="critical"]   { background: var(--critical-bg); border-color: var(--critical); color: var(--critical-text); }
+  .filter-btn.active[data-filter="high"]        { background: var(--high-bg); border-color: var(--high); color: var(--high-text); }
+  .filter-btn.active[data-filter="medium"]      { background: var(--medium-bg); border-color: var(--medium); color: var(--medium-text); }
+  .filter-btn.active[data-filter="low"]         { background: var(--low-bg); border-color: var(--low); color: var(--low-text); }
+  .filter-btn.active[data-filter="other"]       { background: var(--negligible-bg); border-color: var(--negligible); color: var(--negligible-text); }
+
+  /* Search inputs */
+  .search-input {
+    width: 100%;
+    padding: 10px 12px 10px 36px;
+    font-size: 14px;
+    font-family: inherit;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E") 12px center no-repeat;
+    margin-bottom: 12px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    color: var(--text-primary);
+  }
+
+  .search-input::placeholder {
+    color: var(--text-tertiary);
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-ring);
+  }
 
   /* Sortable column headers */
   .sortable {
@@ -310,11 +523,12 @@
 
   .tag {
     display: inline-block;
-    font-family: 'Source Code Pro', monospace;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
-    background: #eef1f5;
+    background: var(--surface-sunken);
     padding: 2px 8px;
-    border-radius: 3px;
+    border-radius: 4px;
+    color: var(--text-primary);
   }
 
   .footnote {
@@ -323,15 +537,20 @@
     margin-top: 6px;
   }
 
-  /* Accordion styling — bordered cards with shadow */
+  /* Accordion */
   .accordion details {
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     padding: 0;
-    margin-top: 16px;
+    margin-top: var(--space-md);
     background: var(--surface);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
+    transition: border-color 0.15s ease;
+  }
+
+  .accordion details[open] {
+    border-left: 3px solid var(--accent);
   }
 
   .accordion details:first-child {
@@ -340,7 +559,7 @@
 
   .accordion details summary {
     cursor: pointer;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
     padding: 16px 20px;
     list-style: none;
@@ -351,15 +570,24 @@
   }
 
   .accordion details summary:hover {
-    background: var(--bg);
+    background: var(--accent-light);
+  }
+
+  .accordion details summary:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 2px var(--accent-ring);
   }
 
   .accordion details summary::-webkit-details-marker { display: none; }
 
   .accordion details summary::before {
-    content: '\25B6';
-    font-size: 12px;
-    color: var(--text-secondary);
+    content: '';
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 6px solid var(--text-secondary);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
     transition: transform 0.2s ease;
     flex-shrink: 0;
   }
@@ -392,42 +620,187 @@
     padding: 0 20px 16px;
   }
 
-  /* Accordion badge */
+  /* Accordion badge — tinted */
   .accordion-badge {
     display: inline-block;
     font-size: 12px;
     font-weight: 600;
-    padding: 1px 10px;
+    padding: 2px 10px;
     border-radius: 12px;
-    background: var(--bg);
-    color: var(--text-secondary);
-    border: 1px solid var(--border);
+    background: var(--accent-light);
+    color: var(--accent);
   }
 
-  /* Footer — thicker top border, more spacing */
+  /* Ecosystem bar chart */
+  .eco-bars {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-md) 0;
+  }
+
+  .eco-bar-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  .eco-bar-label {
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 100px;
+    text-align: right;
+    color: var(--text-primary);
+  }
+
+  .eco-bar-track {
+    flex: 1;
+    height: 24px;
+    background: var(--surface-sunken);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+
+  .eco-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: var(--radius-sm);
+    min-width: 2px;
+    transition: width 0.3s ease;
+  }
+
+  .eco-bar-count {
+    font-size: 14px;
+    font-weight: 700;
+    min-width: 40px;
+    color: var(--text-primary);
+  }
+
+  /* Empty state */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-2xl) var(--space-lg);
+    color: var(--text-secondary);
+  }
+
+  .empty-state svg {
+    margin-bottom: var(--space-md);
+    color: var(--low);
+  }
+
+  .empty-state h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--low-text);
+    margin-bottom: var(--space-xs);
+  }
+
+  .empty-state p {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  /* Footer */
   footer {
-    margin-top: 48px;
+    margin-top: var(--space-2xl);
     padding-top: 20px;
-    border-top: 2px solid var(--border);
+    border-top: 1px solid var(--border);
     font-size: 12px;
-    color: var(--text-secondary);
+    color: var(--text-tertiary);
     text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
   }
 
-  /* Print styles */
+  footer .footer-brand {
+    color: var(--brand-red);
+    font-weight: 600;
+  }
+
+  /* Focus-visible for all interactive elements */
+  a:focus-visible, button:focus-visible, input:focus-visible, details summary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--accent-ring);
+  }
+
+  /* Dark mode */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-raised: #334155;
+      --surface-sunken: #0f172a;
+
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-tertiary: #64748b;
+
+      --accent: #cbd5e1;
+      --accent-light: rgba(203,213,225,0.08);
+      --accent-ring: rgba(203,213,225,0.2);
+
+      --border: #334155;
+      --border-subtle: #1e293b;
+
+      --critical-bg: rgba(220,38,38,0.15);
+      --critical-text: #FCA5A5;
+      --high-bg: rgba(234,88,12,0.15);
+      --high-text: #FDBA74;
+      --medium-bg: rgba(217,119,6,0.15);
+      --medium-text: #FCD34D;
+      --low-bg: rgba(22,163,74,0.15);
+      --low-text: #86EFAC;
+      --negligible-bg: rgba(100,116,139,0.15);
+      --negligible-text: #94a3b8;
+    }
+
+    .search-input {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
+    }
+
+    .tag {
+      background: var(--surface-sunken);
+    }
+
+    .risk-badge {
+      text-shadow: none;
+    }
+  }
+
+  /* Print — force light mode */
   @media print {
+    :root {
+      --bg: #fff;
+      --surface: #fff;
+      --surface-raised: #fff;
+      --surface-sunken: #f8fafc;
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --text-tertiary: #94a3b8;
+      --border: #e2e8f0;
+      --border-subtle: #f1f5f9;
+    }
+
     body { background: #fff; }
     .page { padding: 20px; }
     .cards { grid-template-columns: repeat(4, 1fr); }
-    .card { box-shadow: none; }
+    .card { box-shadow: none; border-top-width: 3px; }
     .card:hover { transform: none; }
     tbody tr:hover { background: none; }
-    .vuln-filters, #vuln-search { display: none; }
-    #comp-filter { display: none; }
+    .vuln-filters, .search-input { display: none; }
     .accordion details { box-shadow: none; break-inside: avoid; }
-    .sev-pill { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .sev-bar { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .risk-badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .sev-pill, .kev-badge, .risk-badge, .sev-bar, .donut-container {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .sev-pill::before, .kev-badge::before {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
     tr.sev-critical td:first-child,
     tr.sev-high td:first-child,
     tr.sev-medium td:first-child,
@@ -437,26 +810,29 @@
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
-    .sev-legend span::before {
+    .donut-legend-dot, .eco-bar-fill, .epss-bar-fill, .fix-bar-fill {
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
-    tbody tr:nth-child(even) { background: none; }
+    thead th { position: static; }
   }
 
   /* Responsive — tablet */
   @media (max-width: 768px) {
     .cards { grid-template-columns: repeat(2, 1fr); }
     .vuln-filters { gap: 6px; }
-    .filter-btn { padding: 4px 10px; font-size: 12px; }
+    .filter-btn { padding: 4px 12px; font-size: 12px; }
+    .donut-container { grid-template-columns: 1fr; }
+    .overview-panel { border-left: none; padding-left: 0; border-top: 1px solid var(--border); padding-top: var(--space-md); }
   }
 
   /* Responsive — mobile */
   @media (max-width: 480px) {
-    .page { padding: 24px 16px; }
+    .page { padding: var(--space-lg) var(--space-md); }
     .cards { grid-template-columns: 1fr; }
-    .sev-legend { flex-direction: column; gap: 6px; }
     .vuln-filters { flex-wrap: wrap; }
+    .donut-container { padding: var(--space-md); }
+    .eco-bar-label { min-width: 70px; font-size: 12px; }
   }
 </style>
 </head>
@@ -464,29 +840,50 @@
 <div class="page">
 
 <header>
-  <h1>Software Composition Analysis</h1>
-  <div class="meta">Report for <strong>{{.Prefix}}</strong> &mdash; Generated {{.GeneratedAt}}</div>
+  <!-- Rebaze hex icon -->
+  <div class="header-icon">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M16 2L28.124 9V23L16 30L3.876 23V9L16 2Z" fill="#E91E63"/>
+      <path d="M12 12h3.5c1.38 0 2.5.9 2.5 2s-1.12 2-2.5 2H14v4h-2v-8zm2 2.8h1.5c.55 0 1-.36 1-.8s-.45-.8-1-.8H14v1.6zM19 12h2v8h-2z" fill="#fff"/>
+    </svg>
+  </div>
+  <div>
+    <h1>Software Composition Analysis</h1>
+    <div class="meta">Report for <strong>{{.Prefix}}</strong> &mdash; Generated {{.GeneratedAt}}</div>
+  </div>
 </header>
 
 <!-- Executive Summary Cards -->
 <div class="cards">
-  <div class="card">
-    <div class="label">Components</div>
+  <div class="card card--components">
+    <div class="label">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Components
+    </div>
     <div class="value">{{.TotalComponents}}</div>
     <div class="sub">in SBOM</div>
   </div>
-  <div class="card">
-    <div class="label">Vulnerabilities</div>
+  <div class="card card--vulns">
+    <div class="label">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+      Vulnerabilities
+    </div>
     <div class="value">{{.Sev.Total}}</div>
     <div class="sub">{{.Sev.Critical}} critical, {{.Sev.High}} high{{if and .KEVAvailable (gt .KEVCount 0)}}, {{.KEVCount}} in CISA KEV{{end}}</div>
   </div>
-  <div class="card">
-    <div class="label">License Issues</div>
+  <div class="card card--licenses">
+    <div class="label">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+      License Issues
+    </div>
     <div class="value">{{.LicDenied}}</div>
     <div class="sub">{{.LicUnlicensed}} unlicensed</div>
   </div>
-  <div class="card">
-    <div class="label">Risk Level</div>
+  <div class="card card--risk">
+    <div class="label">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Risk Level
+    </div>
     <div class="value"><span class="risk-badge" style="background:{{.Risk.Color}}">{{.Risk.Label}}</span></div>
     <div class="sub">{{.LicUnique}} unique licenses</div>
   </div>
@@ -495,26 +892,72 @@
 <section>
   <h2>Vulnerability Overview</h2>
 {{if gt .Sev.Total 0}}
-  <div class="sev-bar">
-    <div class="crit" style="width:{{.PctCritical}}%">{{.Sev.Critical}}</div>
-    <div class="high" style="width:{{.PctHigh}}%">{{.Sev.High}}</div>
-    <div class="med"  style="width:{{.PctMedium}}%">{{.Sev.Medium}}</div>
-    <div class="low"  style="width:{{.PctLow}}%">{{.Sev.Low}}</div>
-    <div class="neg"  style="width:{{.PctNegligible}}%">{{.NegligibleTotal}}</div>
-  </div>
-  <div class="sev-legend">
-    <span class="l-crit">Critical ({{.Sev.Critical}})</span>
-    <span class="l-high">High ({{.Sev.High}})</span>
-    <span class="l-med">Medium ({{.Sev.Medium}})</span>
-    <span class="l-low">Low ({{.Sev.Low}})</span>
-    <span class="l-neg">Other ({{.NegligibleTotal}})</span>
+  <!-- Donut chart -->
+  <div class="donut-container">
+    <div class="donut-chart">
+      <svg class="donut-svg" width="140" height="140" viewBox="0 0 140 140">
+        <circle cx="70" cy="70" r="50" fill="none" stroke="var(--border)" stroke-width="18"/>
+        {{if gt .Sev.Critical 0}}<circle cx="70" cy="70" r="50" fill="none" stroke="var(--critical)" stroke-width="18" stroke-dasharray="{{.DonutCriticalDash}}" stroke-dashoffset="{{.DonutCriticalOff}}" transform="rotate(-90 70 70)" stroke-linecap="butt"/>{{end}}
+        {{if gt .Sev.High 0}}<circle cx="70" cy="70" r="50" fill="none" stroke="var(--high)" stroke-width="18" stroke-dasharray="{{.DonutHighDash}}" stroke-dashoffset="{{.DonutHighOff}}" transform="rotate(-90 70 70)" stroke-linecap="butt"/>{{end}}
+        {{if gt .Sev.Medium 0}}<circle cx="70" cy="70" r="50" fill="none" stroke="var(--medium)" stroke-width="18" stroke-dasharray="{{.DonutMediumDash}}" stroke-dashoffset="{{.DonutMediumOff}}" transform="rotate(-90 70 70)" stroke-linecap="butt"/>{{end}}
+        {{if gt .Sev.Low 0}}<circle cx="70" cy="70" r="50" fill="none" stroke="var(--low)" stroke-width="18" stroke-dasharray="{{.DonutLowDash}}" stroke-dashoffset="{{.DonutLowOff}}" transform="rotate(-90 70 70)" stroke-linecap="butt"/>{{end}}
+        {{if gt .NegligibleTotal 0}}<circle cx="70" cy="70" r="50" fill="none" stroke="var(--negligible)" stroke-width="18" stroke-dasharray="{{.DonutNegDash}}" stroke-dashoffset="{{.DonutNegOff}}" transform="rotate(-90 70 70)" stroke-linecap="butt"/>{{end}}
+        <text x="70" y="66" text-anchor="middle" class="donut-center" font-size="28">{{.Sev.Total}}</text>
+        <text x="70" y="82" text-anchor="middle" class="donut-center-label">total</text>
+      </svg>
+      <div class="donut-legend">
+        <div class="donut-legend-item"><span class="donut-legend-dot" style="background:var(--critical)"></span> Critical <span class="donut-legend-count">{{.Sev.Critical}}</span></div>
+        <div class="donut-legend-item"><span class="donut-legend-dot" style="background:var(--high)"></span> High <span class="donut-legend-count">{{.Sev.High}}</span></div>
+        <div class="donut-legend-item"><span class="donut-legend-dot" style="background:var(--medium)"></span> Medium <span class="donut-legend-count">{{.Sev.Medium}}</span></div>
+        <div class="donut-legend-item"><span class="donut-legend-dot" style="background:var(--low)"></span> Low <span class="donut-legend-count">{{.Sev.Low}}</span></div>
+        <div class="donut-legend-item"><span class="donut-legend-dot" style="background:var(--negligible)"></span> Other <span class="donut-legend-count">{{.NegligibleTotal}}</span></div>
+      </div>
+    </div>
+
+    {{if or .EPSSAvailable .KEVAvailable}}
+    <div class="overview-panel">
+      {{if .KEVAvailable}}
+      <div>
+        <div class="overview-stat-label">CISA KEV</div>
+        <div class="overview-stat-value">{{.KEVCount}}</div>
+        <div class="overview-stat-sub">known exploited</div>
+      </div>
+      {{end}}
+      {{if .EPSSAvailable}}
+      <div>
+        <div class="overview-stat-label">EPSS max</div>
+        <div class="overview-stat-value">{{if .MaxEPSS}}{{.MaxEPSS}}{{else}}-{{end}}</div>
+        <div class="overview-stat-sub">exploit probability</div>
+      </div>
+      {{end}}
+    </div>
+    {{end}}
+
+    <div class="overview-panel">
+      <div>
+        <div class="overview-stat-label">Fix Status</div>
+        <div class="overview-stat-value">{{.FixedCount}}<span style="font-size:14px;font-weight:500;color:var(--text-secondary)"> / {{.Sev.Total}}</span></div>
+        <div class="overview-stat-sub">fixes available</div>
+      </div>
+      <div class="fix-bar">
+        <div class="fix-bar-fill" style="width:{{pctOf .FixedCount .Sev.Total}}%"></div>
+      </div>
+    </div>
   </div>
 {{else}}
-  <p style="color:var(--low);font-weight:600;">No vulnerabilities found.</p>
+  <!-- Empty state -->
+  <div class="empty-state">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      <path d="m9 12 2 2 4-4"/>
+    </svg>
+    <h3>No Vulnerabilities Found</h3>
+    <p>All components passed the vulnerability scan.</p>
+  </div>
 {{end}}
 
 {{if .AllVulns}}
-  <h2 style="border:none;margin-top:24px;">All Vulnerabilities</h2>
+  <h2 style="border:none;margin-top:var(--space-lg);">All Vulnerabilities</h2>
   <div class="vuln-filters">
     <button class="filter-btn active" data-filter="all">All</button>
     <button class="filter-btn" data-filter="critical">Critical</button>
@@ -523,10 +966,7 @@
     <button class="filter-btn" data-filter="low">Low</button>
     <button class="filter-btn" data-filter="other">Other</button>
   </div>
-  <input type="text" id="vuln-search" placeholder="Search vulnerabilities (CVE, package, version)..." style="
-    width:100%;padding:8px 12px;font-size:14px;border:1px solid var(--border);
-    border-radius:6px;margin-bottom:12px;font-family:inherit;
-  ">
+  <input type="text" id="vuln-search" class="search-input" placeholder="Search vulnerabilities (CVE, package, version)...">
   <table id="vuln-table">
     <thead><tr>
       <th>CVE / ID</th>
@@ -544,13 +984,13 @@
     <tbody>
 {{range .AllVulns}}
       <tr class="sev-{{.SevClass}}" data-sev="{{.SevClass}}" data-sev-order="{{.SevOrder}}" data-epss="{{.EPSSRaw}}">
-        <td>{{.ID}}</td>
+        <td><span style="font-family:'JetBrains Mono',monospace;font-size:13px;">{{.ID}}</span></td>
         <td><span class="sev-pill sev-pill-{{.SevClass}}">{{.Severity}}</span></td>
         <td>{{.Package}}</td>
-        <td>{{.Version}}</td>
+        <td><span class="tag">{{.Version}}</span></td>
         <td>{{.Fix}}</td>
 {{if $.EPSSAvailable}}
-        <td>{{if .EPSS}}{{.EPSS}}{{else}}-{{end}}</td>
+        <td>{{if .EPSS}}<div class="epss-cell"><span class="epss-bar"><span class="epss-bar-fill{{if gt .EPSSRaw 0.5}} epss-high{{else if gt .EPSSRaw 0.1}} epss-medium{{else}} epss-low{{end}}" style="width:{{.EPSSPct}}%"></span></span> {{.EPSS}}</div>{{else}}-{{end}}</td>
 {{end}}
 {{if $.KEVAvailable}}
         <td>{{if .InKEV}}<span class="kev-badge">KEV</span>{{end}}</td>
@@ -568,14 +1008,15 @@
     <summary>
       Composition by Ecosystem <span class="accordion-badge">{{len .Ecosystems}}</span>
     </summary>
-    <table>
-      <thead><tr><th>Ecosystem</th><th>Packages</th></tr></thead>
-      <tbody>
+    <div class="eco-bars">
 {{range .Ecosystems}}
-        <tr><td>{{.Key}}</td><td>{{.Count}}</td></tr>
+      <div class="eco-bar-row">
+        <span class="eco-bar-label">{{.Key}}</span>
+        <div class="eco-bar-track"><div class="eco-bar-fill" style="width:{{pctOf .Count $.EcoMax}}%"></div></div>
+        <span class="eco-bar-count">{{.Count}}</span>
+      </div>
 {{end}}
-      </tbody>
-    </table>
+    </div>
   </details>
 
   <details>
@@ -622,10 +1063,7 @@
       Full Component Inventory <span class="accordion-badge">{{len .Components}}</span>
     </summary>
     <div>
-      <input type="text" id="comp-filter" placeholder="Filter components..." style="
-        width:100%;padding:8px 12px;font-size:14px;border:1px solid var(--border);
-        border-radius:6px;margin-bottom:12px;font-family:inherit;
-      ">
+      <input type="text" id="comp-filter" class="search-input" placeholder="Filter components...">
       <table id="comp-table">
         <thead><tr>
           <th class="sortable" data-sort="name">Component <span class="sort-icon">&#9650;</span></th>
@@ -635,7 +1073,7 @@
         </tr></thead>
         <tbody>
 {{range .Components}}
-          <tr><td>{{.Name}}</td><td><span class="tag">{{.Version}}</span></td><td>{{.Ecosystem}}</td><td style="font-family:'Source Code Pro',monospace;font-size:13px;">{{.Locations}}</td></tr>
+          <tr><td>{{.Name}}</td><td><span class="tag">{{.Version}}</span></td><td>{{.Ecosystem}}</td><td style="font-family:'JetBrains Mono',monospace;font-size:13px;">{{.Locations}}</td></tr>
 {{end}}
         </tbody>
       </table>
@@ -789,7 +1227,7 @@
 {{end}}
 
 <footer>
-  Generated from SBOM scan data &mdash; Syft / Grype / Grant &mdash; {{.GeneratedAt}}
+  Powered by <span class="footer-brand">rebaze</span> &mdash; Syft / Grype / Grant &mdash; {{.GeneratedAt}}
 </footer>
 </div>
 </body>

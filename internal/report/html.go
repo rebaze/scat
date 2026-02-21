@@ -3,6 +3,7 @@ package report
 import (
 	"embed"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"sort"
@@ -36,6 +37,9 @@ type htmlData struct {
 	EPSSAvailable bool
 	KEVAvailable  bool
 	KEVCount      int
+	MaxEPSS       string // formatted: "33.3%" (highest EPSS across all vulns)
+	FixedCount    int    // vulns where Fix == "fixed"
+	UnfixedCount  int    // vulns where Fix != "fixed"
 
 	// License summary
 	LicDenied     int
@@ -44,12 +48,25 @@ type htmlData struct {
 	LicNonSPDX    int
 
 	Ecosystems  []keyCount
+	EcoMax      int // largest ecosystem count (for bar chart scaling)
 	LicenseDist []keyCount
 
 	DeniedTotal int
 	DeniedPkgs  []deniedRow
 
 	Components []componentRow
+
+	// Donut chart arc data (circumference = 314.16 for r=50)
+	DonutCriticalDash string
+	DonutCriticalOff  string
+	DonutHighDash     string
+	DonutHighOff      string
+	DonutMediumDash   string
+	DonutMediumOff    string
+	DonutLowDash      string
+	DonutLowOff       string
+	DonutNegDash      string
+	DonutNegOff       string
 }
 
 type vulnRow struct {
@@ -61,6 +78,7 @@ type vulnRow struct {
 	Version  string
 	Fix      string
 	EPSS     string  // formatted display string
+	EPSSPct  string  // percentage for micro-bar width (e.g. "12.3")
 	EPSSRaw  float64 // raw value for sorting
 	InKEV    bool
 	KEVDueDate string
@@ -107,6 +125,37 @@ func GenerateHTML(result *model.ScanResult, prefix, outDir, generatedAt string) 
 		data.PctNegligible = pct(negligibleTotal, sev.Total)
 	}
 
+	// Donut chart arcs (circumference = 2 * π * 50 = 314.159...)
+	if sev.Total > 0 {
+		const circ = 2 * math.Pi * 50
+		offset := 0.0
+		arcLen := func(count int) float64 { return float64(count) / float64(sev.Total) * circ }
+
+		cArc := arcLen(sev.Critical)
+		data.DonutCriticalDash = fmt.Sprintf("%.2f %.2f", cArc, circ-cArc)
+		data.DonutCriticalOff = fmt.Sprintf("%.2f", -offset)
+		offset += cArc
+
+		hArc := arcLen(sev.High)
+		data.DonutHighDash = fmt.Sprintf("%.2f %.2f", hArc, circ-hArc)
+		data.DonutHighOff = fmt.Sprintf("%.2f", -offset)
+		offset += hArc
+
+		mArc := arcLen(sev.Medium)
+		data.DonutMediumDash = fmt.Sprintf("%.2f %.2f", mArc, circ-mArc)
+		data.DonutMediumOff = fmt.Sprintf("%.2f", -offset)
+		offset += mArc
+
+		lArc := arcLen(sev.Low)
+		data.DonutLowDash = fmt.Sprintf("%.2f %.2f", lArc, circ-lArc)
+		data.DonutLowOff = fmt.Sprintf("%.2f", -offset)
+		offset += lArc
+
+		nArc := arcLen(negligibleTotal)
+		data.DonutNegDash = fmt.Sprintf("%.2f %.2f", nArc, circ-nArc)
+		data.DonutNegOff = fmt.Sprintf("%.2f", -offset)
+	}
+
 	// Enrichment flags
 	data.EPSSAvailable = result.EPSSAvailable
 	data.KEVAvailable = result.KEVAvailable
@@ -114,11 +163,23 @@ func GenerateHTML(result *model.ScanResult, prefix, outDir, generatedAt string) 
 	// All vulns table
 	data.AllVulns = buildAllVulns(result.Vulns)
 
-	// Count KEV entries
+	// Single-pass: count KEV entries, track max EPSS, count fix status
+	var maxEPSS float64
 	for _, row := range data.AllVulns {
 		if row.InKEV {
 			data.KEVCount++
 		}
+		if row.EPSSRaw > maxEPSS {
+			maxEPSS = row.EPSSRaw
+		}
+		if row.Fix == "fixed" {
+			data.FixedCount++
+		} else {
+			data.UnfixedCount++
+		}
+	}
+	if maxEPSS > 0 {
+		data.MaxEPSS = fmt.Sprintf("%.1f%%", maxEPSS*100)
 	}
 
 	// License summary (from first target)
@@ -134,6 +195,11 @@ func GenerateHTML(result *model.ScanResult, prefix, outDir, generatedAt string) 
 	data.Ecosystems = countByField(result.SBOM.Components, func(c model.Component) string {
 		return extractPURLScheme(c.PURL)
 	})
+	for _, ec := range data.Ecosystems {
+		if ec.Count > data.EcoMax {
+			data.EcoMax = ec.Count
+		}
+	}
 
 	// License distribution
 	data.LicenseDist = gatherLicenseDistribution(result.License)
@@ -179,7 +245,16 @@ func GenerateHTML(result *model.ScanResult, prefix, outDir, generatedAt string) 
 		})
 	}
 
-	tmpl, err := template.ParseFS(templateFS, "templates/summary.html.tmpl")
+	funcMap := template.FuncMap{
+		"pctOf": func(count, max int) string {
+			if max == 0 {
+				return "0"
+			}
+			return fmt.Sprintf("%.1f", float64(count)*100.0/float64(max))
+		},
+	}
+
+	tmpl, err := template.New("summary.html.tmpl").Funcs(funcMap).ParseFS(templateFS, "templates/summary.html.tmpl")
 	if err != nil {
 		return "", fmt.Errorf("parsing HTML template: %w", err)
 	}
@@ -233,6 +308,7 @@ func buildAllVulns(vulns *model.VulnReport) []vulnRow {
 		if m.Vulnerability.EPSS != nil {
 			row.EPSSRaw = *m.Vulnerability.EPSS
 			row.EPSS = fmt.Sprintf("%.1f%%", *m.Vulnerability.EPSS*100)
+			row.EPSSPct = fmt.Sprintf("%.1f", *m.Vulnerability.EPSS*100)
 		}
 		rows = append(rows, row)
 	}
