@@ -422,7 +422,7 @@
     .card { box-shadow: none; }
     .card:hover { transform: none; }
     tbody tr:hover { background: none; }
-    .vuln-filters { display: none; }
+    .vuln-filters, #vuln-search { display: none; }
     #comp-filter { display: none; }
     .accordion details { box-shadow: none; break-inside: avoid; }
     .sev-pill { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -523,6 +523,10 @@
     <button class="filter-btn" data-filter="low">Low</button>
     <button class="filter-btn" data-filter="other">Other</button>
   </div>
+  <input type="text" id="vuln-search" placeholder="Search vulnerabilities (CVE, package, version)..." style="
+    width:100%;padding:8px 12px;font-size:14px;border:1px solid var(--border);
+    border-radius:6px;margin-bottom:12px;font-family:inherit;
+  ">
   <table id="vuln-table">
     <thead><tr>
       <th>CVE / ID</th>
@@ -623,7 +627,12 @@
         border-radius:6px;margin-bottom:12px;font-family:inherit;
       ">
       <table id="comp-table">
-        <thead><tr><th>Component</th><th>Version</th><th>Ecosystem</th><th>Source Location</th></tr></thead>
+        <thead><tr>
+          <th class="sortable" data-sort="name">Component <span class="sort-icon">&#9650;</span></th>
+          <th class="sortable" data-sort="version">Version <span class="sort-icon">&#9650;</span></th>
+          <th class="sortable" data-sort="ecosystem">Ecosystem <span class="sort-icon">&#9650;</span></th>
+          <th>Source Location</th>
+        </tr></thead>
         <tbody>
 {{range .Components}}
           <tr><td>{{.Name}}</td><td><span class="tag">{{.Version}}</span></td><td>{{.Ecosystem}}</td><td style="font-family:'Source Code Pro',monospace;font-size:13px;">{{.Locations}}</td></tr>
@@ -638,16 +647,34 @@
 {{if .AllVulns}}
 <script>
 (function(){
-  /* -- Vulnerability filter buttons -- */
+  /* -- Vulnerability filter buttons + text search -- */
   var filterBtns = document.querySelectorAll('.filter-btn');
   var vulnRows = document.querySelectorAll('#vuln-table tbody tr');
   var vulnCount = document.getElementById('vuln-count');
+  var vulnSearch = document.getElementById('vuln-search');
   var totalVulns = vulnRows.length;
+  var activeSevFilter = 'all';
 
-  function updateCount() {
+  function applyFilters() {
+    var q = vulnSearch.value.toLowerCase();
     var visible = 0;
     vulnRows.forEach(function(row) {
-      if (row.style.display !== 'none') visible++;
+      var sev = row.getAttribute('data-sev');
+      var sevMatch;
+      if (activeSevFilter === 'all') {
+        sevMatch = true;
+      } else if (activeSevFilter === 'other') {
+        sevMatch = (sev !== 'critical' && sev !== 'high' && sev !== 'medium' && sev !== 'low');
+      } else {
+        sevMatch = (sev === activeSevFilter);
+      }
+      var textMatch = !q || row.textContent.toLowerCase().indexOf(q) !== -1;
+      if (sevMatch && textMatch) {
+        row.style.display = '';
+        visible++;
+      } else {
+        row.style.display = 'none';
+      }
     });
     vulnCount.textContent = 'Showing ' + visible + ' of ' + totalVulns + ' vulnerabilities';
   }
@@ -656,21 +683,12 @@
     btn.addEventListener('click', function() {
       filterBtns.forEach(function(b) { b.classList.remove('active'); });
       btn.classList.add('active');
-      var filter = btn.getAttribute('data-filter');
-
-      vulnRows.forEach(function(row) {
-        var sev = row.getAttribute('data-sev');
-        if (filter === 'all') {
-          row.style.display = '';
-        } else if (filter === 'other') {
-          row.style.display = (sev !== 'critical' && sev !== 'high' && sev !== 'medium' && sev !== 'low') ? '' : 'none';
-        } else {
-          row.style.display = (sev === filter) ? '' : 'none';
-        }
-      });
-      updateCount();
+      activeSevFilter = btn.getAttribute('data-filter');
+      applyFilters();
     });
   });
+
+  vulnSearch.addEventListener('input', applyFilters);
 
   /* -- Sortable columns -- */
   var sortHeaders = document.querySelectorAll('#vuln-table .sortable');
@@ -731,6 +749,39 @@
     var q = this.value.toLowerCase();
     rows.forEach(function(row){
       row.style.display = row.textContent.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
+    });
+  });
+
+  /* -- Sortable columns for component table -- */
+  var sortHeaders = document.querySelectorAll('#comp-table .sortable');
+  var tbody = document.querySelector('#comp-table tbody');
+  var colMap = { name: 0, version: 1, ecosystem: 2 };
+  var sortState = {};
+
+  sortHeaders.forEach(function(th) {
+    var sortKey = th.getAttribute('data-sort');
+    sortState[sortKey] = 'asc';
+
+    th.addEventListener('click', function() {
+      var dir = sortState[sortKey] === 'asc' ? 'desc' : 'asc';
+      sortState[sortKey] = dir;
+
+      sortHeaders.forEach(function(h) {
+        h.classList.remove('sort-active');
+        h.querySelector('.sort-icon').innerHTML = '&#9650;';
+      });
+      th.classList.add('sort-active');
+      th.querySelector('.sort-icon').innerHTML = dir === 'asc' ? '&#9650;' : '&#9660;';
+
+      var col = colMap[sortKey];
+      var rowArr = Array.prototype.slice.call(rows);
+      rowArr.sort(function(a, b) {
+        var valA = a.cells[col].textContent.toLowerCase();
+        var valB = b.cells[col].textContent.toLowerCase();
+        var cmp = valA < valB ? -1 : (valA > valB ? 1 : 0);
+        return dir === 'asc' ? cmp : -cmp;
+      });
+      rowArr.forEach(function(row) { tbody.appendChild(row); });
     });
   });
 })();
