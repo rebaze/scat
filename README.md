@@ -13,7 +13,7 @@ An opinionated, self-contained CLI that answers the questions that matter: what'
 ## Features
 
 - **CycloneDX SBOM** — industry-standard software bill of materials
-- **Vulnerability scanning** — matches packages against known CVEs with severity scoring
+- **Vulnerability scanning** — matches packages against known CVEs with severity scoring, enriched with EPSS exploit probability and CISA KEV (Known Exploited Vulnerabilities) data
 - **License compliance** — detects and evaluates open-source licenses
 - **HTML dashboard** — beautiful out-of-the-box light and dark mode report ready to share, with severity bars, risk heatmap, and print-friendly layout
 - **Single binary** — no external tools required on PATH; Syft, Grype, and license checking are embedded as Go libraries
