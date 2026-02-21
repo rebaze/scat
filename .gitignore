@@ -10,3 +10,6 @@ dist/
 *-report-vulns.md
 *-report-licenses.md
 *-summary.html
+
+# Test fixtures with vulnerable dependencies (derived/downloaded)
+testdata/
