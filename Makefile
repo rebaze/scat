@@ -12,11 +12,11 @@ BIN       := scat
 build:
 	go build -ldflags "$(LDFLAGS)" -o $(BIN) .
 
-## run: build then run 'analyze' on a target (set TARGET=<dir>)
+## run: build then run on a target (set TARGET=<dir>)
 ##   example: make run TARGET=../some-project
 run: build
 	@[ -n "$(TARGET)" ] || { echo "usage: make run TARGET=<dir>"; exit 1; }
-	./$(BIN) analyze $(TARGET)
+	./$(BIN) $(TARGET)
 
 ## vet: run go vet
 vet:

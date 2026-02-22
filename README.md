@@ -44,7 +44,7 @@ make build    # injects version, commit, and build date via ldflags
 ## Quick Start
 
 ```bash
-scat analyze /path/to/my-project
+scat /path/to/my-project
 ```
 
 This runs the full pipeline and writes an HTML dashboard to the current directory. Open `my-project-summary.html` in a browser to explore results.
@@ -52,20 +52,19 @@ This runs the full pipeline and writes an HTML dashboard to the current director
 For pipeline or LLM consumption, use Markdown output on stdout:
 
 ```bash
-scat analyze -f markdown /path/to/my-project | llm "summarize critical vulnerabilities"
-scat analyze -f markdown /path/to/my-project > report.md
+scat -f markdown /path/to/my-project | llm "summarize critical vulnerabilities"
+scat -f markdown /path/to/my-project > report.md
 ```
 
 ## CLI Reference
 
-### Commands
+```
+scat <path>
+```
 
-| Command | Description |
-|---------|-------------|
-| `scat analyze <folder>` | Run the full scan-and-report pipeline |
-| `scat version` | Print version information |
+There are no subcommands. Just point `scat` at a directory or PURL file.
 
-### Global Flags
+### Flags
 
 | Flag | Short | Default | Description |
 |------|-------|---------|-------------|
@@ -73,12 +72,8 @@ scat analyze -f markdown /path/to/my-project > report.md
 | `--format` | `-f` | `html` | Output format: `html` (file), `markdown` (stdout) |
 | `--verbose` | `-v` | `false` | Verbose output |
 | `--quiet` | `-q` | `false` | Suppress non-error output |
-
-### Analyze Flags
-
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--clear-cache` | `false` | Delete the cached Grype vulnerability database before scanning |
+| `--clear-cache` | | `false` | Delete the cached Grype vulnerability database before scanning |
+| `--version` | | | Print version information |
 
 ## Output
 
@@ -99,26 +94,32 @@ When using `-f markdown`, the TUI progress bar is routed to stderr so it stays v
 
 ```bash
 # Default: HTML dashboard
-scat analyze myproject
+scat myproject
 # → writes ./myproject-summary.html, TUI progress on terminal
 
 # HTML to a specific directory
-scat analyze -o /tmp myproject
+scat -o /tmp myproject
 # → writes /tmp/myproject-summary.html
 
 # Markdown to terminal
-scat analyze -f markdown myproject
+scat -f markdown myproject
 # → TUI on stderr, Markdown on stdout
 
 # Pipe to an LLM
-scat analyze -f markdown myproject | llm "summarize critical vulnerabilities"
+scat -f markdown myproject | llm "summarize critical vulnerabilities"
 
 # Save Markdown to a file
-scat analyze -f markdown myproject > report.md
+scat -f markdown myproject > report.md
 
 # Quiet mode (no TUI)
-scat analyze -q myproject
-scat analyze -f markdown -q myproject
+scat -q myproject
+scat -f markdown -q myproject
+
+# Re-download vulnerability database
+scat --clear-cache myproject
+
+# Print version
+scat --version
 ```
 
 ## Pipeline
@@ -127,8 +128,8 @@ scat analyze -f markdown -q myproject
   source folder
        │
        ▼
-  scat analyze             → <prefix>-summary.html   (default)
-  scat analyze -f markdown → stdout                   (pipe-friendly)
+  scat <folder>              → <prefix>-summary.html   (default)
+  scat -f markdown <folder>  → stdout                   (pipe-friendly)
 ```
 
 ## License

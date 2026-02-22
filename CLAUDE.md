@@ -11,10 +11,8 @@ A Software Composition Analysis (SCA) toolchain. The `scat` Go CLI generates SBO
 ```
 main.go                         Entry point
 Makefile                        Build helpers (build, run, vet, tidy, clean)
-cmd/                            Cobra CLI commands
-  root.go                       Global flags (--output-dir, --format, --verbose, --quiet)
-  analyze.go                    Full pipeline command (--clear-cache flag)
-  version.go                    Version from ldflags
+cmd/                            Cobra CLI
+  root.go                       Single command with all flags and pipeline logic
 internal/
   scan/                         Pipeline orchestration (uses syft/grype Go libraries)
   model/                        Data types (SBOM, VulnReport, LicenseReport, RiskLevel)
@@ -30,14 +28,14 @@ internal/
 
 ```bash
 go build -o scat .              # or: make build (injects version via ldflags)
-./scat analyze <folder>
-./scat analyze --clear-cache <folder>   # re-download Grype vulnerability DB
-./scat version
+./scat <folder>
+./scat --clear-cache <folder>   # re-download Grype vulnerability DB
+./scat --version
 ```
 
 ## Pipeline
 
-`scat analyze <folder>` runs a scan phase then produces a single output:
+`scat <folder>` runs a scan phase then produces a single output:
 
 1. **Scan** — Uses Syft library for SBOM, Grype library for vulns, custom Go logic for licenses (intermediate JSON files are created and cleaned up automatically)
 2. **Output** — One format per invocation, controlled by `--format` / `-f`:
