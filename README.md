@@ -5,6 +5,7 @@
 [![GitHub Release](https://img.shields.io/github/v/release/rebaze/scat)](https://github.com/rebaze/scat/releases/latest)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![Go](https://img.shields.io/github/go-mod/go-version/rebaze/scat)](go.mod)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/rebaze/scat/badge)](https://scorecard.dev/viewer/?uri=github.com/rebaze/scat)
 
 **Software Composition Analysis Tool** — that's what scat stands for.
 
