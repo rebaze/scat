@@ -27,6 +27,18 @@ Opens an HTML dashboard with severity bars, risk heatmap, and license overview. 
 ![Dark mode](assets/screen1_dark.png)
 ![Light mode](assets/screen2_light.png)
 
+## For AI agents
+
+Install the [Claude Code](https://claude.ai/code) skill to let AI agents use scat:
+
+```bash
+mkdir -p ~/.claude/skills/scat
+curl -fsSL https://raw.githubusercontent.com/rebaze/scat/main/skill/SKILL.md \
+  -o ~/.claude/skills/scat/SKILL.md
+```
+
+Once installed, Claude knows when and how to run scat on your projects.
+
 ## Features
 
 - **CycloneDX SBOM** — industry-standard software bill of materials
