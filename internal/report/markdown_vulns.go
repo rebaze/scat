@@ -2,24 +2,19 @@ package report
 
 import (
 	"fmt"
-	"os"
 	"sort"
 	"strings"
 
 	"github.com/rebaze/scat/internal/model"
 )
 
-func generateVulnReport(vulns *model.VulnReport, outPath, prefix, generatedAt string) error {
-	var b strings.Builder
-
-	b.WriteString(fmt.Sprintf("# Vulnerability Report — %s\n\n", prefix))
-	b.WriteString(fmt.Sprintf("**Generated:** %s\n", generatedAt))
-	b.WriteString(fmt.Sprintf("**Source:** %s-vulns.json\n\n", prefix))
+func writeVulnSection(b *strings.Builder, vulns *model.VulnReport) {
+	b.WriteString("## Vulnerabilities\n\n")
 
 	counts := vulns.CountSeverities()
 
 	// Summary table
-	b.WriteString("## Summary\n\n")
+	b.WriteString("### Summary\n\n")
 	b.WriteString("| Severity | Count |\n")
 	b.WriteString("|----------|-------|\n")
 	b.WriteString(fmt.Sprintf("| Critical | %d |\n", counts.Critical))
@@ -33,7 +28,7 @@ func generateVulnReport(vulns *model.VulnReport, outPath, prefix, generatedAt st
 	// Exploit intelligence summary
 	kevCount, highEPSSCount := countExploitIntelligence(vulns)
 	if kevCount > 0 || highEPSSCount > 0 {
-		b.WriteString("## Exploit Intelligence\n\n")
+		b.WriteString("### Exploit Intelligence\n\n")
 		if kevCount > 0 {
 			b.WriteString(fmt.Sprintf("- **CISA KEV:** %d vulnerabilit%s actively exploited in the wild\n", kevCount, pluralSuffix(kevCount)))
 		}
@@ -44,7 +39,7 @@ func generateVulnReport(vulns *model.VulnReport, outPath, prefix, generatedAt st
 	}
 
 	// Vulnerabilities by Severity
-	b.WriteString("## Vulnerabilities by Severity\n\n")
+	b.WriteString("### Vulnerabilities by Severity\n\n")
 
 	sorted := make([]model.Match, len(vulns.Matches))
 	copy(sorted, vulns.Matches)
@@ -53,7 +48,7 @@ func generateVulnReport(vulns *model.VulnReport, outPath, prefix, generatedAt st
 	})
 
 	for _, m := range sorted {
-		b.WriteString(fmt.Sprintf("### %s — %s\n\n", m.Vulnerability.ID, m.Vulnerability.Severity))
+		b.WriteString(fmt.Sprintf("#### %s — %s\n\n", m.Vulnerability.ID, m.Vulnerability.Severity))
 		b.WriteString(fmt.Sprintf("- **Package:** %s %s\n", m.Artifact.Name, m.Artifact.Version))
 
 		fixState := m.Vulnerability.Fix.State
@@ -90,8 +85,6 @@ func generateVulnReport(vulns *model.VulnReport, outPath, prefix, generatedAt st
 		}
 		b.WriteString("\n")
 	}
-
-	return os.WriteFile(outPath, []byte(b.String()), 0o644)
 }
 
 func countExploitIntelligence(vulns *model.VulnReport) (kevCount, highEPSSCount int) {

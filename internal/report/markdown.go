@@ -1,29 +1,24 @@
 package report
 
 import (
-	"path/filepath"
+	"fmt"
+	"io"
+	"strings"
 
 	"github.com/rebaze/scat/internal/model"
 )
 
-// GenerateMarkdown produces all three markdown report files.
-// Returns the list of generated file paths.
-func GenerateMarkdown(result *model.ScanResult, prefix, outDir, generatedAt string) ([]string, error) {
-	sbomPath := filepath.Join(outDir, prefix+"-report-sbom.md")
-	vulnPath := filepath.Join(outDir, prefix+"-report-vulns.md")
-	licensePath := filepath.Join(outDir, prefix+"-report-licenses.md")
+// RenderMarkdown writes a consolidated markdown report to the given writer.
+func RenderMarkdown(w io.Writer, result *model.ScanResult, prefix, generatedAt string) error {
+	var b strings.Builder
 
-	if err := generateSBOMReport(result.SBOM, sbomPath, prefix, generatedAt); err != nil {
-		return nil, err
-	}
+	b.WriteString(fmt.Sprintf("# SCA Report — %s\n\n", prefix))
+	b.WriteString(fmt.Sprintf("**Generated:** %s\n\n", generatedAt))
 
-	if err := generateVulnReport(result.Vulns, vulnPath, prefix, generatedAt); err != nil {
-		return nil, err
-	}
+	writeSBOMSection(&b, result.SBOM)
+	writeVulnSection(&b, result.Vulns)
+	writeLicenseSection(&b, result.License)
 
-	if err := generateLicenseReport(result.License, licensePath, prefix, generatedAt); err != nil {
-		return nil, err
-	}
-
-	return []string{sbomPath, vulnPath, licensePath}, nil
+	_, err := io.WriteString(w, b.String())
+	return err
 }

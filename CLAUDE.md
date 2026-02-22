@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A Software Composition Analysis (SCA) toolchain. The `scat` Go CLI generates SBOMs, scans for vulnerabilities, checks licenses, and produces reports in JSON, Markdown, and HTML formats.
+A Software Composition Analysis (SCA) toolchain. The `scat` Go CLI generates SBOMs, scans for vulnerabilities, checks licenses, and produces reports in Markdown and HTML formats.
 
 ## Repository Layout
 
@@ -37,11 +37,12 @@ go build -o scat .              # or: make build (injects version via ldflags)
 
 ## Pipeline
 
-`scat analyze <folder>` runs three phases:
+`scat analyze <folder>` runs a scan phase then produces a single output:
 
-1. **Scan** — Uses Syft library for SBOM, Grype library for vulns, custom Go logic for licenses; produces `<prefix>-sbom.json`, `<prefix>-vulns.json`, `<prefix>-licenses.json`
-2. **Markdown Reports** — Generates `*-report-sbom.md`, `*-report-vulns.md`, `*-report-licenses.md`
-3. **HTML Dashboard** — Generates `<prefix>-summary.html` with severity bars, risk scoring, print-friendly layout
+1. **Scan** — Uses Syft library for SBOM, Grype library for vulns, custom Go logic for licenses (intermediate JSON files are created and cleaned up automatically)
+2. **Output** — One format per invocation, controlled by `--format` / `-f`:
+   - `html` (default) — writes `<prefix>-summary.html` dashboard to `--output-dir`
+   - `markdown` — writes consolidated report to stdout (TUI progress on stderr)
 
 The `<prefix>` is derived from the scanned folder's basename.
 

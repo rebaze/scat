@@ -22,9 +22,17 @@ var clearCache bool
 var analyzeCmd = &cobra.Command{
 	Use:   "analyze <path>",
 	Short: "Run full SCA pipeline: scan, report, and summarize",
-	Long:  "Scans a source directory or PURL list file for components, vulnerabilities, and license issues, then generates JSON, Markdown, and HTML reports.\nWhen <path> is a directory, components are discovered via Syft.\nWhen <path> is a text file containing Package URLs (one per line), a synthetic SBOM is created from those PURLs.",
-	Args:  cobra.ExactArgs(1),
-	RunE:  runAnalyze,
+	Long: `Scans a source directory or PURL list file for components, vulnerabilities,
+and license issues. Produces a single output per invocation.
+
+  -f html      (default) writes an HTML dashboard to --output-dir
+  -f markdown  prints a consolidated Markdown report to stdout
+
+When <path> is a directory, components are discovered via Syft.
+When <path> is a text file containing Package URLs (one per line),
+a synthetic SBOM is created from those PURLs.`,
+	Args: cobra.ExactArgs(1),
+	RunE: runAnalyze,
 }
 
 func init() {
@@ -37,6 +45,12 @@ func runAnalyze(cmd *cobra.Command, args []string) error {
 	info, err := os.Stat(target)
 	if err != nil {
 		return fmt.Errorf("cannot access '%s': %w", target, err)
+	}
+
+	switch format {
+	case "html", "markdown":
+	default:
+		return fmt.Errorf("unsupported format %q; valid: html, markdown", format)
 	}
 
 	var absFolder string
@@ -76,10 +90,6 @@ func runAnalyze(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("clearing enrichment cache: %w", err)
 		}
 	}
-
-	wantJSON := format == "all" || format == "json"
-	wantMarkdown := format == "all" || format == "markdown"
-	wantHTML := format == "all" || format == "html"
 
 	sbomPath := filepath.Join(outDir, prefix+"-sbom.json")
 	vulnPath := filepath.Join(outDir, prefix+"-vulns.json")
@@ -169,17 +179,7 @@ func runAnalyze(cmd *cobra.Command, args []string) error {
 		},
 	}
 
-	if wantMarkdown {
-		steps = append(steps, tui.Step{
-			Name: "Generating reports",
-			Run: func() error {
-				_, err := report.GenerateMarkdown(&result, prefix, outDir, generatedAt)
-				return err
-			},
-		})
-	}
-
-	if wantHTML {
+	if format == "html" {
 		steps = append(steps, tui.Step{
 			Name: "Building dashboard",
 			Run: func() error {
@@ -197,7 +197,11 @@ func runAnalyze(cmd *cobra.Command, args []string) error {
 		}
 	} else {
 		m := tui.New(steps)
-		p := tea.NewProgram(m)
+		var opts []tea.ProgramOption
+		if format == "markdown" {
+			opts = append(opts, tea.WithOutput(os.Stderr))
+		}
+		p := tea.NewProgram(m, opts...)
 		finalModel, err := p.Run()
 		if err != nil {
 			return fmt.Errorf("progress UI: %w", err)
@@ -209,10 +213,13 @@ func runAnalyze(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	if !wantJSON {
-		os.Remove(sbomPath)
-		os.Remove(vulnPath)
-		os.Remove(licensePath)
+	// Always clean up intermediate JSON files
+	os.Remove(sbomPath)
+	os.Remove(vulnPath)
+	os.Remove(licensePath)
+
+	if format == "markdown" {
+		return report.RenderMarkdown(os.Stdout, &result, prefix, generatedAt)
 	}
 
 	return nil

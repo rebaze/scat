@@ -19,7 +19,7 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&outputDir, "output-dir", "o", ".", "Directory for output files")
-	rootCmd.PersistentFlags().StringVarP(&format, "format", "f", "all", "Output format: json, markdown, html, all")
+	rootCmd.PersistentFlags().StringVarP(&format, "format", "f", "html", "Output format: html (file, default), markdown (stdout)")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Verbose output")
 	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", false, "Suppress non-error output")
 }

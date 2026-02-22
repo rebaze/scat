@@ -2,22 +2,17 @@ package report
 
 import (
 	"fmt"
-	"os"
 	"sort"
 	"strings"
 
 	"github.com/rebaze/scat/internal/model"
 )
 
-func generateSBOMReport(sbom *model.SBOM, outPath, prefix, generatedAt string) error {
-	var b strings.Builder
-
-	b.WriteString(fmt.Sprintf("# SBOM Summary — %s\n\n", prefix))
-	b.WriteString(fmt.Sprintf("**Generated:** %s\n", generatedAt))
-	b.WriteString(fmt.Sprintf("**Source:** %s-sbom.json\n\n", prefix))
+func writeSBOMSection(b *strings.Builder, sbom *model.SBOM) {
+	b.WriteString("## Component Inventory\n\n")
 
 	// Overview table
-	b.WriteString("## Overview\n\n")
+	b.WriteString("### Overview\n\n")
 	b.WriteString("| Metric | Value |\n")
 	b.WriteString("|--------|-------|\n")
 	b.WriteString(fmt.Sprintf("| Total Components | %d |\n", len(sbom.Components)))
@@ -39,7 +34,7 @@ func generateSBOMReport(sbom *model.SBOM, outPath, prefix, generatedAt string) e
 	b.WriteString(fmt.Sprintf("| Serial Number | %s |\n\n", serial))
 
 	// Components by Type
-	b.WriteString("## Components by Type\n\n")
+	b.WriteString("### Components by Type\n\n")
 	b.WriteString("| Type | Count |\n")
 	b.WriteString("|------|-------|\n")
 
@@ -50,7 +45,7 @@ func generateSBOMReport(sbom *model.SBOM, outPath, prefix, generatedAt string) e
 	b.WriteString("\n")
 
 	// Components by Package Manager (PURL scheme)
-	b.WriteString("## Components by Package Manager (PURL scheme)\n\n")
+	b.WriteString("### Components by Package Manager (PURL scheme)\n\n")
 	b.WriteString("| Ecosystem | Count |\n")
 	b.WriteString("|-----------|-------|\n")
 
@@ -65,7 +60,7 @@ func generateSBOMReport(sbom *model.SBOM, outPath, prefix, generatedAt string) e
 	b.WriteString("\n")
 
 	// Component List
-	b.WriteString("## Component List\n\n")
+	b.WriteString("### Component List\n\n")
 	b.WriteString("| Name | Version | Type | PURL |\n")
 	b.WriteString("|------|---------|------|------|\n")
 
@@ -89,8 +84,7 @@ func generateSBOMReport(sbom *model.SBOM, outPath, prefix, generatedAt string) e
 		}
 		b.WriteString(fmt.Sprintf("| %s | %s | %s | %s |\n", c.Name, version, typ, purl))
 	}
-
-	return os.WriteFile(outPath, []byte(b.String()), 0o644)
+	b.WriteString("\n")
 }
 
 type keyCount struct {

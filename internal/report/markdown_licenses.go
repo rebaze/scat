@@ -2,22 +2,17 @@ package report
 
 import (
 	"fmt"
-	"os"
 	"sort"
 	"strings"
 
 	"github.com/rebaze/scat/internal/model"
 )
 
-func generateLicenseReport(lic *model.LicenseReport, outPath, prefix, generatedAt string) error {
-	var b strings.Builder
-
-	b.WriteString(fmt.Sprintf("# License Report — %s\n\n", prefix))
-	b.WriteString(fmt.Sprintf("**Generated:** %s\n", generatedAt))
-	b.WriteString(fmt.Sprintf("**Source:** %s-licenses.json\n\n", prefix))
+func writeLicenseSection(b *strings.Builder, lic *model.LicenseReport) {
+	b.WriteString("## Licenses\n\n")
 
 	// Evaluation Summary (for each target)
-	b.WriteString("## Evaluation Summary\n\n")
+	b.WriteString("### Evaluation Summary\n\n")
 
 	for _, target := range lic.Run.Targets {
 		ref := target.Source.Ref
@@ -51,7 +46,7 @@ func generateLicenseReport(lic *model.LicenseReport, outPath, prefix, generatedA
 	}
 
 	// License Distribution
-	b.WriteString("## License Distribution\n\n")
+	b.WriteString("### License Distribution\n\n")
 	b.WriteString("| License | Packages |\n")
 	b.WriteString("|---------|----------|\n")
 
@@ -66,7 +61,7 @@ func generateLicenseReport(lic *model.LicenseReport, outPath, prefix, generatedA
 	b.WriteString("\n")
 
 	// Denied Components
-	b.WriteString("## Denied Components\n\n")
+	b.WriteString("### Denied Components\n\n")
 	b.WriteString("| Package | Version | License |\n")
 	b.WriteString("|---------|---------|----------|\n")
 
@@ -93,7 +88,7 @@ func generateLicenseReport(lic *model.LicenseReport, outPath, prefix, generatedA
 	b.WriteString("\n")
 
 	// Package Details
-	b.WriteString("## Package Details\n\n")
+	b.WriteString("### Package Details\n\n")
 	b.WriteString("| Package | Version | License | Status |\n")
 	b.WriteString("|---------|---------|---------|--------|\n")
 
@@ -121,8 +116,7 @@ func generateLicenseReport(lic *model.LicenseReport, outPath, prefix, generatedA
 			b.WriteString(fmt.Sprintf("| %s | %s | %s | %s |\n", name, version, licenses, status))
 		}
 	}
-
-	return os.WriteFile(outPath, []byte(b.String()), 0o644)
+	b.WriteString("\n")
 }
 
 func gatherLicenseDistribution(lic *model.LicenseReport) []keyCount {
