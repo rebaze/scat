@@ -24,6 +24,9 @@ Full SCA report — SBOM, vulnerabilities, licenses — as structured Markdown o
 
 Opens an HTML dashboard with severity bars, risk heatmap, and license overview. One file, ready to share.
 
+![Dark mode](assets/screen1_dark.png)
+![Light mode](assets/screen2_light.png)
+
 ## Features
 
 - **CycloneDX SBOM** — industry-standard software bill of materials
