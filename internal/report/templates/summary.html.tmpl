@@ -88,34 +88,57 @@
     position: relative;
   }
 
-  /* Header */
-  header {
+  /* Logo bar */
+  .report-logo {
     display: flex;
-    align-items: flex-start;
-    gap: var(--space-md);
-    padding-bottom: var(--space-lg);
+    justify-content: center;
+    padding: var(--space-xl) 0;
+    margin-bottom: var(--space-lg);
+  }
+
+  .report-logo img {
+    height: 60px;
+    width: auto;
+    display: block;
+  }
+
+  /* Scan metadata card */
+  .scan-meta {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg) var(--space-xl);
     margin-bottom: var(--space-2xl);
-    border-left: 4px solid var(--brand-red);
-    padding-left: var(--space-lg);
+    box-shadow: var(--shadow-sm);
   }
 
-  .header-icon {
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-
-  header h1 {
-    font-size: 26px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    margin-bottom: 2px;
-    color: var(--text-primary);
-  }
-
-  header .meta {
-    font-size: 14px;
+  .scan-meta-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
     color: var(--text-secondary);
-    font-weight: 400;
+    margin-bottom: var(--space-md);
+  }
+
+  .scan-meta-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px var(--space-xl);
+    font-size: 14px;
+  }
+
+  .scan-meta-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+
+  .scan-meta-value {
+    color: var(--text-primary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    word-break: break-all;
   }
 
   /* Summary cards */
@@ -712,14 +735,16 @@
     color: var(--text-tertiary);
     text-align: center;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 8px;
   }
 
-  footer .footer-brand {
-    color: var(--brand-red);
-    font-weight: 600;
+  .footer-logo {
+    height: 28px;
+    width: auto;
+    display: block;
   }
 
   /* Focus-visible for all interactive elements */
@@ -770,6 +795,11 @@
     :root:not([data-theme="light"]) .risk-badge {
       text-shadow: none;
     }
+
+    :root:not([data-theme="light"]) .report-logo img,
+    :root:not([data-theme="light"]) .footer-logo {
+      filter: invert(1);
+    }
   }
 
   /* Dark mode — manual (explicit toggle) */
@@ -812,6 +842,11 @@
 
   :root[data-theme="dark"] .risk-badge {
     text-shadow: none;
+  }
+
+  :root[data-theme="dark"] .report-logo img,
+  :root[data-theme="dark"] .footer-logo {
+    filter: invert(1);
   }
 
   /* Theme toggle button */
@@ -929,19 +964,25 @@
   <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
 </button>
 
-<header>
-  <!-- Rebaze hex icon -->
-  <div class="header-icon">
-    <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M16 2L28.124 9V23L16 30L3.876 23V9L16 2Z" fill="#E91E63"/>
-      <path d="M12 12h3.5c1.38 0 2.5.9 2.5 2s-1.12 2-2.5 2H14v4h-2v-8zm2 2.8h1.5c.55 0 1-.36 1-.8s-.45-.8-1-.8H14v1.6zM19 12h2v8h-2z" fill="#fff"/>
-    </svg>
+{{if not .Unbranded}}
+<div class="report-logo">
+  <img src="{{.LogoHeader}}" alt="Rebaze">
+</div>
+{{end}}
+
+<div class="scan-meta">
+  <div class="scan-meta-title">Software Composition Analysis</div>
+  <div class="scan-meta-grid">
+    <span class="scan-meta-label">Target</span>
+    <span class="scan-meta-value">{{.TargetPath}}</span>
+    <span class="scan-meta-label">Files</span>
+    <span class="scan-meta-value">{{commaInt .FileCount}} files · {{.TotalSize}}</span>
+    <span class="scan-meta-label">Hash</span>
+    <span class="scan-meta-value">{{.Hash}}</span>
+    <span class="scan-meta-label">Generated</span>
+    <span class="scan-meta-value">{{.GeneratedAt}}</span>
   </div>
-  <div>
-    <h1>Software Composition Analysis</h1>
-    <div class="meta">Report for <strong>{{.Prefix}}</strong> &mdash; Generated {{.GeneratedAt}}</div>
-  </div>
-</header>
+</div>
 
 <!-- Executive Summary Cards -->
 <div class="cards">
@@ -1316,9 +1357,16 @@
 </script>
 {{end}}
 
+{{if .Unbranded}}
 <footer>
-  Powered by <span class="footer-brand">rebaze</span> &mdash; Syft / Grype / Grant &mdash; {{.GeneratedAt}}
+  <div class="footer-text">scat {{.Version}} · Apache License 2.0 · <a href="https://github.com/rebaze/scat">github.com/rebaze/scat</a></div>
 </footer>
+{{else}}
+<footer>
+  <img src="{{.LogoFooter}}" alt="Rebaze" class="footer-logo">
+  <div class="footer-text">&copy; 2026 rebaze GmbH</div>
+</footer>
+{{end}}
 
 <script>
 function toggleTheme() {

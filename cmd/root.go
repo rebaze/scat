@@ -1,9 +1,12 @@
 package cmd
 
 import (
+	"crypto/sha256"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -94,6 +97,14 @@ func runAnalyze(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("'%s' is neither a directory nor a regular file", target)
 	}
 
+	// Compute scan metadata from the target
+	var metadata *model.ScanMetadata
+	if absFolder != "" {
+		metadata = computeDirMetadata(absFolder)
+	} else {
+		metadata = computeFileMetadata(purlFile)
+	}
+
 	outDir := outputDir
 
 	if err := output.EnsureDir(outDir); err != nil {
@@ -177,6 +188,7 @@ func runAnalyze(cmd *cobra.Command, args []string) error {
 					SBOM:        sbom,
 					Vulns:       vulns,
 					License:     license,
+					Metadata:    metadata,
 					SBOMPath:    sbomPath,
 					VulnPath:    vulnPath,
 					LicensePath: licensePath,
@@ -202,11 +214,13 @@ func runAnalyze(cmd *cobra.Command, args []string) error {
 		},
 	}
 
+	unbranded := os.Getenv("SCAT_UNBRANDED") != ""
+
 	if format == "html" {
 		steps = append(steps, tui.Step{
 			Name: "Building dashboard",
 			Run: func() error {
-				htmlPath, err = report.GenerateHTML(&result, prefix, outDir, generatedAt)
+				htmlPath, err = report.GenerateHTML(&result, prefix, outDir, generatedAt, version, unbranded)
 				return err
 			},
 		})
@@ -254,4 +268,62 @@ func runAnalyze(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+// computeDirMetadata walks a directory and computes file count, total size,
+// and a deterministic SHA-256 hash over sorted "relpath:size" pairs.
+func computeDirMetadata(dir string) *model.ScanMetadata {
+	var count int
+	var totalSize int64
+	var entries []string
+
+	_ = filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return nil
+		}
+		info, err := d.Info()
+		if err != nil {
+			return nil
+		}
+		rel, _ := filepath.Rel(dir, path)
+		count++
+		totalSize += info.Size()
+		entries = append(entries, fmt.Sprintf("%s:%d", rel, info.Size()))
+		return nil
+	})
+
+	sort.Strings(entries)
+	h := sha256.New()
+	for _, e := range entries {
+		h.Write([]byte(e))
+	}
+	hash := fmt.Sprintf("%x", h.Sum(nil))[:12]
+
+	return &model.ScanMetadata{
+		TargetPath: dir,
+		FileCount:  count,
+		TotalSize:  totalSize,
+		Hash:       hash,
+	}
+}
+
+// computeFileMetadata computes metadata for a single PURL file input.
+func computeFileMetadata(path string) *model.ScanMetadata {
+	abs, _ := filepath.Abs(path)
+	info, err := os.Stat(path)
+	if err != nil {
+		return &model.ScanMetadata{TargetPath: abs, FileCount: 1}
+	}
+	h := sha256.New()
+	if data, err := os.ReadFile(path); err == nil {
+		h.Write(data)
+	}
+	hash := fmt.Sprintf("%x", h.Sum(nil))[:12]
+
+	return &model.ScanMetadata{
+		TargetPath: abs,
+		FileCount:  1,
+		TotalSize:  info.Size(),
+		Hash:       hash,
+	}
 }

@@ -2,6 +2,7 @@ package report
 
 import (
 	"embed"
+	"encoding/base64"
 	"fmt"
 	"math"
 	"os"
@@ -16,12 +17,32 @@ import (
 //go:embed templates/summary.html.tmpl
 var templateFS embed.FS
 
+//go:embed assets/Rebaze_hlogo_bw_tbg.png
+var logoHeaderPNG []byte
+
+//go:embed assets/Rebaze_icon_bw_tbg.png
+var logoFooterPNG []byte
+
 type htmlData struct {
 	Prefix          string
 	GeneratedAt     string
 	TotalComponents int
 	Sev             model.SeverityCounts
 	Risk            model.RiskLevel
+
+	// Unbranded mode: omit Rebaze logos, show project attribution in footer
+	Unbranded bool
+	Version   string // e.g. "v0.3.2" — shown in unbranded footer
+
+	// Embedded logos as base64 data URIs
+	LogoHeader string
+	LogoFooter string
+
+	// Scan metadata
+	TargetPath string
+	FileCount  int
+	TotalSize  string // pre-formatted: "12.4 MB"
+	Hash       string // short hash: first 12 chars
 
 	// Vulnerability percentages for severity bar
 	PctCritical   string
@@ -98,7 +119,7 @@ type componentRow struct {
 }
 
 // GenerateHTML produces the HTML summary dashboard.
-func GenerateHTML(result *model.ScanResult, prefix, outDir, generatedAt string) (string, error) {
+func GenerateHTML(result *model.ScanResult, prefix, outDir, generatedAt, version string, unbranded bool) (string, error) {
 	outPath := filepath.Join(outDir, prefix+"-summary.html")
 
 	sev := result.Vulns.CountSeverities()
@@ -114,6 +135,20 @@ func GenerateHTML(result *model.ScanResult, prefix, outDir, generatedAt string) 
 		Sev:             sev,
 		Risk:            risk,
 		NegligibleTotal: negligibleTotal,
+		Unbranded:       unbranded,
+		Version:         version,
+	}
+
+	if !unbranded {
+		data.LogoHeader = "data:image/png;base64," + base64.StdEncoding.EncodeToString(logoHeaderPNG)
+		data.LogoFooter = "data:image/png;base64," + base64.StdEncoding.EncodeToString(logoFooterPNG)
+	}
+
+	if result.Metadata != nil {
+		data.TargetPath = result.Metadata.TargetPath
+		data.FileCount = result.Metadata.FileCount
+		data.TotalSize = humanSize(result.Metadata.TotalSize)
+		data.Hash = result.Metadata.Hash
 	}
 
 	// Severity bar percentages
@@ -252,6 +287,20 @@ func GenerateHTML(result *model.ScanResult, prefix, outDir, generatedAt string) 
 			}
 			return fmt.Sprintf("%.1f", float64(count)*100.0/float64(max))
 		},
+		"commaInt": func(n int) string {
+			s := fmt.Sprintf("%d", n)
+			if len(s) <= 3 {
+				return s
+			}
+			var result []byte
+			for i, c := range s {
+				if i > 0 && (len(s)-i)%3 == 0 {
+					result = append(result, ',')
+				}
+				result = append(result, byte(c))
+			}
+			return string(result)
+		},
 	}
 
 	tmpl, err := template.New("summary.html.tmpl").Funcs(funcMap).ParseFS(templateFS, "templates/summary.html.tmpl")
@@ -270,6 +319,24 @@ func GenerateHTML(result *model.ScanResult, prefix, outDir, generatedAt string) 
 	}
 
 	return outPath, nil
+}
+
+func humanSize(b int64) string {
+	const (
+		kb = 1024
+		mb = 1024 * kb
+		gb = 1024 * mb
+	)
+	switch {
+	case b >= gb:
+		return fmt.Sprintf("%.1f GB", float64(b)/float64(gb))
+	case b >= mb:
+		return fmt.Sprintf("%.1f MB", float64(b)/float64(mb))
+	case b >= kb:
+		return fmt.Sprintf("%.1f KB", float64(b)/float64(kb))
+	default:
+		return fmt.Sprintf("%d B", b)
+	}
 }
 
 func pct(count, total int) string {

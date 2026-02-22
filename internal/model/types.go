@@ -109,12 +109,23 @@ type LicensePackage struct {
 	Status   string   `json:"status"`
 }
 
+// Scan metadata (target info computed before scanning)
+
+type ScanMetadata struct {
+	TargetPath string
+	FileCount  int
+	TotalSize  int64  // bytes
+	Hash       string // short SHA-256
+}
+
 // Aggregate scan result
 
 type ScanResult struct {
 	SBOM    *SBOM
 	Vulns   *VulnReport
 	License *LicenseReport
+
+	Metadata *ScanMetadata
 
 	SBOMPath    string
 	VulnPath    string
