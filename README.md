@@ -8,7 +8,21 @@
 
 **Software Composition Analysis Tool** — that's what scat stands for.
 
-An opinionated, self-contained CLI that answers the questions that matter: what's in your software, what's vulnerable, and what are the license obligations? One command, one output — an HTML dashboard for humans or Markdown for pipelines and LLMs.
+One command that answers three questions: what's in your software, what's vulnerable, and what are the license obligations? Built for two audiences — AI agents that need structured data on stdout, and humans who want a visual dashboard. Both are first-class.
+
+## For machines
+
+AI agent? Run this:
+
+    scat <target> --quiet -f markdown
+
+Full SCA report — SBOM, vulnerabilities, licenses — as structured Markdown on stdout. No files written, no TUI, just data. Pipe it, parse it, feed it to your next step.
+
+## For humans
+
+    scat <target>
+
+Opens an HTML dashboard with severity bars, risk heatmap, and license overview. One file, ready to share.
 
 ## Features
 
@@ -17,7 +31,6 @@ An opinionated, self-contained CLI that answers the questions that matter: what'
 - **License compliance** — detects and evaluates open-source licenses
 - **HTML dashboard** — beautiful out-of-the-box light and dark mode report ready to share, with severity bars, risk heatmap, and print-friendly layout
 - **Single binary** — no external tools required on PATH; Syft, Grype, and license checking are embedded as Go libraries
-- **Two output formats** — HTML dashboard (default, file) or Markdown (stdout, pipe-friendly)
 
 ## Installation
 
@@ -39,21 +52,6 @@ go install github.com/rebaze/scat@latest
 git clone https://github.com/rebaze/scat.git
 cd scat
 make build    # injects version, commit, and build date via ldflags
-```
-
-## Quick Start
-
-```bash
-scat /path/to/my-project
-```
-
-This runs the full pipeline and writes an HTML dashboard to the current directory. Open `my-project-summary.html` in a browser to explore results.
-
-For pipeline or LLM consumption, use Markdown output on stdout:
-
-```bash
-scat -f markdown /path/to/my-project | llm "summarize critical vulnerabilities"
-scat -f markdown /path/to/my-project > report.md
 ```
 
 ## CLI Reference
