@@ -68,14 +68,11 @@ type htmlData struct {
 	LicUnique     int
 	LicNonSPDX    int
 
-	Ecosystems  []keyCount
-	EcoMax      int // largest ecosystem count (for bar chart scaling)
-	LicenseDist []keyCount
-
-	DeniedTotal int
-	DeniedPkgs  []deniedRow
-
-	Components []componentRow
+	// Unified component details (master table)
+	ComponentDetails    []componentDetail
+	ComponentsWithVulns int
+	ComponentsWithDenied int
+	ComponentsClean     int
 
 	// Donut chart arc data (circumference = 314.16 for r=50)
 	DonutCriticalDash string
@@ -105,17 +102,36 @@ type vulnRow struct {
 	KEVDueDate string
 }
 
-type deniedRow struct {
-	Name     string
-	Version  string
-	Licenses string
-}
-
-type componentRow struct {
+// componentDetail is a unified row merging SBOM + vulns + licenses per component.
+type componentDetail struct {
 	Name      string
 	Version   string
 	Ecosystem string
 	Locations string
+
+	// Vulnerability summary
+	Vulns         []vulnRow
+	VulnCritical  int
+	VulnHigh      int
+	VulnMedium    int
+	VulnLow       int
+	VulnOther     int
+	VulnTotal     int
+	WorstSevOrder int    // 0=Critical..5=Unknown (for sorting)
+	WorstSevClass string // CSS class of worst severity
+
+	// License info
+	Licenses      []licenseDetail
+	LicenseStatus string // "allowed", "denied", "unlicensed", "unknown"
+
+	// EOL placeholder
+	EOLStatus      string // always "unknown" for now
+	VersionsBehind string // always "n/a" for now
+}
+
+type licenseDetail struct {
+	Name       string
+	StatusClass string // "allowed", "denied", "unlicensed"
 }
 
 // GenerateHTML produces the HTML summary dashboard.
@@ -226,58 +242,17 @@ func GenerateHTML(result *model.ScanResult, prefix, outDir, generatedAt, version
 		data.LicNonSPDX = t.Evaluation.Summary.Licenses.NonSPDX
 	}
 
-	// Ecosystems
-	data.Ecosystems = countByField(result.SBOM.Components, func(c model.Component) string {
-		return extractPURLScheme(c.PURL)
-	})
-	for _, ec := range data.Ecosystems {
-		if ec.Count > data.EcoMax {
-			data.EcoMax = ec.Count
+	// Unified component details (master table)
+	data.ComponentDetails = buildComponentDetails(result)
+	for _, cd := range data.ComponentDetails {
+		switch {
+		case cd.VulnTotal > 0:
+			data.ComponentsWithVulns++
+		case cd.LicenseStatus == "denied" || cd.LicenseStatus == "unlicensed":
+			data.ComponentsWithDenied++
+		default:
+			data.ComponentsClean++
 		}
-	}
-
-	// License distribution
-	data.LicenseDist = gatherLicenseDistribution(result.License)
-
-	// Denied packages
-	denied := gatherDeniedPackages(result.License)
-	data.DeniedTotal = len(denied)
-	limit := 20
-	if len(denied) < limit {
-		limit = len(denied)
-	}
-	for _, p := range denied[:limit] {
-		name := p.Name
-		if name == "" {
-			name = "unknown"
-		}
-		version := p.Version
-		if version == "" {
-			version = "-"
-		}
-		licenses := strings.Join(p.Licenses, ", ")
-		if licenses == "" {
-			licenses = "n/a"
-		}
-		data.DeniedPkgs = append(data.DeniedPkgs, deniedRow{
-			Name:     name,
-			Version:  version,
-			Licenses: licenses,
-		})
-	}
-
-	// Component inventory with source locations
-	for _, c := range result.SBOM.Components {
-		loc := strings.Join(c.Locations, ", ")
-		if loc == "" {
-			loc = "-"
-		}
-		data.Components = append(data.Components, componentRow{
-			Name:      c.Name,
-			Version:   c.Version,
-			Ecosystem: extractPURLScheme(c.PURL),
-			Locations: loc,
-		})
 	}
 
 	funcMap := template.FuncMap{
@@ -383,4 +358,144 @@ func buildAllVulns(vulns *model.VulnReport) []vulnRow {
 		return severityOrder(rows[i].Severity) < severityOrder(rows[j].Severity)
 	})
 	return rows
+}
+
+// buildComponentDetails performs a three-way join of SBOM components, vuln matches,
+// and license findings into a unified per-component view.
+func buildComponentDetails(result *model.ScanResult) []componentDetail {
+	// Index vuln matches by lowercase(name)@version
+	vulnIndex := map[string][]vulnRow{}
+	for _, m := range result.Vulns.Matches {
+		sev := m.Vulnerability.Severity
+		if sev == "" {
+			sev = "Unknown"
+		}
+		fix := m.Vulnerability.Fix.State
+		if fix == "" {
+			fix = "unknown"
+		}
+		version := m.Artifact.Version
+		if version == "" {
+			version = "-"
+		}
+		row := vulnRow{
+			ID:         m.Vulnerability.ID,
+			Severity:   sev,
+			SevClass:   strings.ToLower(sev),
+			SevOrder:   severityOrder(sev),
+			Package:    m.Artifact.Name,
+			Version:    version,
+			Fix:        fix,
+			InKEV:      m.Vulnerability.InKEV,
+			KEVDueDate: m.Vulnerability.KEVDueDate,
+		}
+		if m.Vulnerability.EPSS != nil {
+			row.EPSSRaw = *m.Vulnerability.EPSS
+			row.EPSS = fmt.Sprintf("%.1f%%", *m.Vulnerability.EPSS*100)
+			row.EPSSPct = fmt.Sprintf("%.1f", *m.Vulnerability.EPSS*100)
+		}
+		key := strings.ToLower(m.Artifact.Name) + "@" + m.Artifact.Version
+		vulnIndex[key] = append(vulnIndex[key], row)
+	}
+
+	// Index license findings by lowercase(name)@version
+	type licInfo struct {
+		Licenses []licenseDetail
+		Status   string // worst status: denied > unlicensed > allowed
+	}
+	licIndex := map[string]licInfo{}
+	for _, target := range result.License.Run.Targets {
+		for _, pkg := range target.Evaluation.Findings.Packages {
+			key := strings.ToLower(pkg.Name) + "@" + pkg.Version
+			var details []licenseDetail
+			for _, l := range pkg.Licenses {
+				sc := "allowed"
+				if pkg.Status == "denied" {
+					sc = "denied"
+				}
+				details = append(details, licenseDetail{Name: l, StatusClass: sc})
+			}
+			if len(pkg.Licenses) == 0 {
+				details = append(details, licenseDetail{Name: "UNLICENSED", StatusClass: "unlicensed"})
+			}
+			status := pkg.Status
+			if status == "" {
+				if len(pkg.Licenses) == 0 {
+					status = "unlicensed"
+				} else {
+					status = "allowed"
+				}
+			}
+			licIndex[key] = licInfo{Licenses: details, Status: status}
+		}
+	}
+
+	// Build unified list from SBOM components
+	var details []componentDetail
+	for _, c := range result.SBOM.Components {
+		loc := strings.Join(c.Locations, ", ")
+		if loc == "" {
+			loc = "-"
+		}
+		eco := extractPURLScheme(c.PURL)
+
+		d := componentDetail{
+			Name:           c.Name,
+			Version:        c.Version,
+			Ecosystem:      eco,
+			Locations:      loc,
+			WorstSevOrder:  6, // higher than any severity = no vulns
+			WorstSevClass:  "",
+			LicenseStatus:  "unknown",
+			EOLStatus:      "unknown",
+			VersionsBehind: "n/a",
+		}
+
+		// Merge vulns
+		key := strings.ToLower(c.Name) + "@" + c.Version
+		if vulns, ok := vulnIndex[key]; ok {
+			// Sort vulns by severity
+			sort.Slice(vulns, func(i, j int) bool {
+				return vulns[i].SevOrder < vulns[j].SevOrder
+			})
+			d.Vulns = vulns
+			d.VulnTotal = len(vulns)
+			for _, v := range vulns {
+				switch v.Severity {
+				case "Critical":
+					d.VulnCritical++
+				case "High":
+					d.VulnHigh++
+				case "Medium":
+					d.VulnMedium++
+				case "Low":
+					d.VulnLow++
+				default:
+					d.VulnOther++
+				}
+				if v.SevOrder < d.WorstSevOrder {
+					d.WorstSevOrder = v.SevOrder
+					d.WorstSevClass = v.SevClass
+				}
+			}
+		}
+
+		// Merge licenses
+		if li, ok := licIndex[key]; ok {
+			d.Licenses = li.Licenses
+			d.LicenseStatus = li.Status
+		}
+
+		details = append(details, d)
+	}
+
+	// Sort: worst severity first (lower order = worse), then alphabetical
+	sort.Slice(details, func(i, j int) bool {
+		if details[i].WorstSevOrder != details[j].WorstSevOrder {
+			return details[i].WorstSevOrder < details[j].WorstSevOrder
+		}
+		return strings.ToLower(details[i].Name) < strings.ToLower(details[j].Name)
+	})
+
+	return details
 }

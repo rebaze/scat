@@ -561,143 +561,217 @@
     margin-top: 6px;
   }
 
-  /* Accordion */
-  .accordion details {
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 0;
-    margin-top: var(--space-md);
-    background: var(--surface);
-    box-shadow: var(--shadow-sm);
+  /* Master component table */
+  #master-table {
+    table-layout: fixed;
+  }
+
+  #master-table th:nth-child(1) { width: 28px; }
+  #master-table th:nth-child(3) { width: 100px; }
+  #master-table th:nth-child(4) { width: 100px; }
+  #master-table th:nth-child(5) { width: 160px; }
+  #master-table th:nth-child(6) { width: 110px; }
+  #master-table th:nth-child(7) { width: 90px; }
+
+  #master-table td:nth-child(2) {
     overflow: hidden;
-    transition: border-color 0.15s ease;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 0;
   }
 
-  .accordion details[open] {
-    border-left: 3px solid var(--accent);
-  }
-
-  .accordion details:first-child {
-    margin-top: 0;
-  }
-
-  .accordion details summary {
+  .master-row {
     cursor: pointer;
-    font-size: 16px;
-    font-weight: 700;
-    padding: 16px 20px;
-    list-style: none;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: background 0.15s ease;
+    transition: background 0.1s ease;
   }
 
-  .accordion details summary:hover {
+  .master-row:hover {
     background: var(--accent-light);
   }
 
-  .accordion details summary:focus-visible {
-    outline: none;
-    box-shadow: inset 0 0 0 2px var(--accent-ring);
+  .master-row.expanded {
+    background: var(--accent-light);
+    border-bottom: none;
   }
 
-  .accordion details summary::-webkit-details-marker { display: none; }
+  .master-row.expanded td {
+    border-bottom: none;
+  }
 
-  .accordion details summary::before {
-    content: '';
+  .master-row td:first-child {
+    width: 28px;
+    text-align: center;
+    padding-right: 0;
+  }
+
+  .expand-chevron {
     display: inline-block;
-    width: 0;
-    height: 0;
-    border-left: 6px solid var(--text-secondary);
-    border-top: 5px solid transparent;
-    border-bottom: 5px solid transparent;
+    font-size: 10px;
+    color: var(--text-secondary);
     transition: transform 0.2s ease;
-    flex-shrink: 0;
   }
 
-  .accordion details[open] summary::before {
+  .master-row.expanded .expand-chevron {
     transform: rotate(90deg);
   }
 
-  .accordion details > :not(summary) {
-    padding: 0 20px;
+  .detail-row {
+    display: none;
   }
 
-  .accordion details > table {
-    margin: 0;
+  .detail-row.visible {
+    display: table-row;
   }
 
-  .accordion details > table thead th {
-    padding-left: 20px;
+  .detail-row td {
+    padding: 0;
+    border-bottom: 1px solid var(--border);
   }
 
-  .accordion details > table tbody td:first-child {
-    padding-left: 20px;
+  .detail-row:hover {
+    background: transparent !important;
   }
 
-  .accordion details > p.footnote {
-    padding: 0 20px 16px;
-  }
-
-  .accordion details > div {
-    padding: 0 20px 16px;
-  }
-
-  /* Accordion badge — tinted */
-  .accordion-badge {
-    display: inline-block;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 2px 10px;
-    border-radius: 12px;
-    background: var(--accent-light);
-    color: var(--accent);
-  }
-
-  /* Ecosystem bar chart */
-  .eco-bars {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-    padding: var(--space-md) 0;
-  }
-
-  .eco-bar-row {
-    display: flex;
-    align-items: center;
+  .detail-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: var(--space-md);
-  }
-
-  .eco-bar-label {
-    font-size: 14px;
-    font-weight: 600;
-    min-width: 100px;
-    text-align: right;
-    color: var(--text-primary);
-  }
-
-  .eco-bar-track {
-    flex: 1;
-    height: 24px;
+    padding: var(--space-md) var(--space-lg) var(--space-lg);
     background: var(--surface-sunken);
-    border-radius: var(--radius-sm);
-    overflow: hidden;
+    border-top: 1px solid var(--border-subtle);
   }
 
-  .eco-bar-fill {
-    height: 100%;
-    background: var(--accent);
+  .detail-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    min-width: 2px;
-    transition: width 0.3s ease;
+    padding: var(--space-md);
   }
 
-  .eco-bar-count {
-    font-size: 14px;
+  .detail-section h4 {
+    font-size: 11px;
     font-weight: 700;
-    min-width: 40px;
-    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-sm);
+  }
+
+  .detail-section table {
+    font-size: 13px;
+  }
+
+  .detail-section thead th {
+    font-size: 10px;
+    padding: 6px 8px;
+    position: static;
+    background: transparent;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .detail-section tbody td {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .detail-section-full {
+    grid-column: 1 / -1;
+  }
+
+  .eol-placeholder {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+    text-align: center;
+    font-style: italic;
+    color: var(--text-tertiary);
+    font-size: 13px;
+  }
+
+  /* Vuln summary pills in master row */
+  .vuln-summary {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .vuln-mini-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    line-height: 1;
+  }
+
+  .vuln-mini-pill.mp-critical { background: var(--critical-bg); color: var(--critical-text); }
+  .vuln-mini-pill.mp-high     { background: var(--high-bg); color: var(--high-text); }
+  .vuln-mini-pill.mp-medium   { background: var(--medium-bg); color: var(--medium-text); }
+  .vuln-mini-pill.mp-low      { background: var(--low-bg); color: var(--low-text); }
+  .vuln-mini-pill.mp-other    { background: var(--negligible-bg); color: var(--negligible-text); }
+
+  /* License status badges */
+  .lic-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .lic-status-pill::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .lic-status-pill.lic-allowed    { background: var(--low-bg); color: var(--low-text); }
+  .lic-status-pill.lic-allowed::before { background: var(--low); }
+  .lic-status-pill.lic-denied     { background: var(--critical-bg); color: var(--critical-text); }
+  .lic-status-pill.lic-denied::before  { background: var(--critical); }
+  .lic-status-pill.lic-unlicensed { background: var(--medium-bg); color: var(--medium-text); }
+  .lic-status-pill.lic-unlicensed::before { background: var(--medium); }
+  .lic-status-pill.lic-unknown    { background: var(--negligible-bg); color: var(--negligible-text); }
+  .lic-status-pill.lic-unknown::before { background: var(--negligible); }
+
+  .lic-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  .lic-badge.lb-allowed    { background: var(--low-bg); color: var(--low-text); }
+  .lic-badge.lb-denied     { background: var(--critical-bg); color: var(--critical-text); }
+  .lic-badge.lb-unlicensed { background: var(--medium-bg); color: var(--medium-text); }
+
+  .freshness-muted {
+    color: var(--text-tertiary);
+    font-style: italic;
+  }
+
+  .comp-filters {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+    flex-wrap: wrap;
+  }
+
+  .filter-count {
+    font-size: 11px;
+    font-weight: 700;
+    opacity: 0.7;
   }
 
   /* Empty state */
@@ -908,8 +982,11 @@
     .card { box-shadow: none; border-top-width: 3px; }
     .card:hover { transform: none; }
     tbody tr:hover { background: none; }
-    .vuln-filters, .search-input, .theme-toggle { display: none; }
-    .accordion details { box-shadow: none; break-inside: avoid; }
+    .comp-filters, .search-input, .theme-toggle { display: none; }
+    .detail-row { display: table-row !important; }
+    .detail-row td { border-bottom: 1px solid var(--border); }
+    .master-row .expand-chevron { display: none; }
+    .detail-panel { break-inside: avoid; }
     .sev-pill, .kev-badge, .risk-badge, .sev-bar, .donut-container {
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
@@ -937,19 +1014,19 @@
   /* Responsive — tablet */
   @media (max-width: 768px) {
     .cards { grid-template-columns: repeat(2, 1fr); }
-    .vuln-filters { gap: 6px; }
+    .comp-filters { gap: 6px; }
     .filter-btn { padding: 4px 12px; font-size: 12px; }
     .donut-container { grid-template-columns: 1fr; }
     .overview-panel { border-left: none; padding-left: 0; border-top: 1px solid var(--border); padding-top: var(--space-md); }
+    .detail-panel { grid-template-columns: 1fr; }
   }
 
   /* Responsive — mobile */
   @media (max-width: 480px) {
     .page { padding: var(--space-lg) var(--space-md); }
     .cards { grid-template-columns: 1fr; }
-    .vuln-filters { flex-wrap: wrap; }
+    .comp-filters { flex-wrap: wrap; }
     .donut-container { padding: var(--space-md); }
-    .eco-bar-label { min-width: 70px; font-size: 12px; }
   }
 </style>
 </head>
@@ -1087,182 +1164,216 @@
   </div>
 {{end}}
 
-{{if .AllVulns}}
-  <h2 style="border:none;margin-top:var(--space-lg);">All Vulnerabilities</h2>
-  <div class="vuln-filters">
-    <button class="filter-btn active" data-filter="all">All</button>
-    <button class="filter-btn" data-filter="critical">Critical</button>
-    <button class="filter-btn" data-filter="high">High</button>
-    <button class="filter-btn" data-filter="medium">Medium</button>
-    <button class="filter-btn" data-filter="low">Low</button>
-    <button class="filter-btn" data-filter="other">Other</button>
+{{if .AllVulns}}{{end}}
+</section>
+
+<!-- Component Master Table -->
+<section>
+  <h2>Component Inventory</h2>
+  <div class="comp-filters">
+    <button class="filter-btn active" data-filter="all">All <span class="filter-count">{{len .ComponentDetails}}</span></button>
+    <button class="filter-btn" data-filter="vulns">With Vulnerabilities <span class="filter-count">{{.ComponentsWithVulns}}</span></button>
+    <button class="filter-btn" data-filter="license">License Issues <span class="filter-count">{{.ComponentsWithDenied}}</span></button>
+    <button class="filter-btn" data-filter="clean">Clean <span class="filter-count">{{.ComponentsClean}}</span></button>
   </div>
-  <input type="text" id="vuln-search" class="search-input" placeholder="Search vulnerabilities (CVE, package, version)...">
-  <table id="vuln-table">
+  <input type="text" id="comp-search" class="search-input" placeholder="Search components, CVE IDs, licenses...">
+  <table id="master-table">
     <thead><tr>
-      <th>CVE / ID</th>
-      <th class="sortable" data-sort="severity">Severity <span class="sort-icon">&#9650;</span></th>
-      <th class="sortable" data-sort="package">Package <span class="sort-icon">&#9650;</span></th>
-      <th>Version</th>
-      <th>Fix</th>
-{{if .EPSSAvailable}}
-      <th class="sortable" data-sort="epss">EPSS <span class="sort-icon">&#9650;</span></th>
-{{end}}
-{{if .KEVAvailable}}
-      <th>KEV</th>
-{{end}}
+      <th></th>
+      <th class="sortable" data-sort="name">Component <span class="sort-icon">&#9650;</span></th>
+      <th class="sortable" data-sort="version">Version <span class="sort-icon">&#9650;</span></th>
+      <th class="sortable" data-sort="ecosystem">Ecosystem <span class="sort-icon">&#9650;</span></th>
+      <th class="sortable" data-sort="vulns">Vulnerabilities <span class="sort-icon">&#9650;</span></th>
+      <th class="sortable" data-sort="license">License <span class="sort-icon">&#9650;</span></th>
+      <th>Freshness</th>
     </tr></thead>
     <tbody>
-{{range .AllVulns}}
-      <tr class="sev-{{.SevClass}}" data-sev="{{.SevClass}}" data-sev-order="{{.SevOrder}}" data-epss="{{.EPSSRaw}}">
-        <td><span style="font-family:'JetBrains Mono',monospace;font-size:13px;">{{.ID}}</span></td>
-        <td><span class="sev-pill sev-pill-{{.SevClass}}">{{.Severity}}</span></td>
-        <td>{{.Package}}</td>
+{{range .ComponentDetails}}
+      <tr class="master-row" data-vulns="{{.VulnTotal}}" data-lic="{{.LicenseStatus}}" data-worst="{{.WorstSevOrder}}">
+        <td><span class="expand-chevron">&#9654;</span></td>
+        <td>{{.Name}}</td>
         <td><span class="tag">{{.Version}}</span></td>
-        <td>{{.Fix}}</td>
-{{if $.EPSSAvailable}}
-        <td>{{if .EPSS}}<div class="epss-cell"><span class="epss-bar"><span class="epss-bar-fill{{if gt .EPSSRaw 0.5}} epss-high{{else if gt .EPSSRaw 0.1}} epss-medium{{else}} epss-low{{end}}" style="width:{{.EPSSPct}}%"></span></span> {{.EPSS}}</div>{{else}}-{{end}}</td>
-{{end}}
-{{if $.KEVAvailable}}
-        <td>{{if .InKEV}}<span class="kev-badge">KEV</span>{{end}}</td>
-{{end}}
+        <td>{{.Ecosystem}}</td>
+        <td>
+          {{- if gt .VulnTotal 0 -}}
+          <div class="vuln-summary">
+            {{- if gt .VulnCritical 0}}<span class="vuln-mini-pill mp-critical">{{.VulnCritical}} C</span>{{end -}}
+            {{- if gt .VulnHigh 0}}<span class="vuln-mini-pill mp-high">{{.VulnHigh}} H</span>{{end -}}
+            {{- if gt .VulnMedium 0}}<span class="vuln-mini-pill mp-medium">{{.VulnMedium}} M</span>{{end -}}
+            {{- if gt .VulnLow 0}}<span class="vuln-mini-pill mp-low">{{.VulnLow}} L</span>{{end -}}
+            {{- if gt .VulnOther 0}}<span class="vuln-mini-pill mp-other">{{.VulnOther}}</span>{{end -}}
+          </div>
+          {{- else -}}
+          <span style="color:var(--text-tertiary)">—</span>
+          {{- end -}}
+        </td>
+        <td><span class="lic-status-pill lic-{{.LicenseStatus}}">{{.LicenseStatus}}</span></td>
+        <td><span class="freshness-muted">--</span></td>
+      </tr>
+      <tr class="detail-row">
+        <td colspan="7">
+          <div class="detail-panel">
+            <!-- Vulnerabilities -->
+            <div class="detail-section{{if eq .VulnTotal 0}} detail-section-full{{end}}">
+              <h4>Vulnerabilities ({{.VulnTotal}})</h4>
+              {{if gt .VulnTotal 0}}
+              <table>
+                <thead><tr>
+                  <th>CVE / ID</th>
+                  <th>Severity</th>
+                  <th>Fix</th>
+                  {{if $.EPSSAvailable}}<th>EPSS</th>{{end}}
+                  {{if $.KEVAvailable}}<th>KEV</th>{{end}}
+                </tr></thead>
+                <tbody>
+                {{range .Vulns}}
+                  <tr>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:12px;">{{.ID}}</span></td>
+                    <td><span class="sev-pill sev-pill-{{.SevClass}}">{{.Severity}}</span></td>
+                    <td>{{.Fix}}</td>
+                    {{if $.EPSSAvailable}}<td>{{if .EPSS}}<div class="epss-cell"><span class="epss-bar"><span class="epss-bar-fill{{if gt .EPSSRaw 0.5}} epss-high{{else if gt .EPSSRaw 0.1}} epss-medium{{else}} epss-low{{end}}" style="width:{{.EPSSPct}}%"></span></span> {{.EPSS}}</div>{{else}}-{{end}}</td>{{end}}
+                    {{if $.KEVAvailable}}<td>{{if .InKEV}}<span class="kev-badge">KEV</span>{{end}}</td>{{end}}
+                  </tr>
+                {{end}}
+                </tbody>
+              </table>
+              {{else}}
+              <p style="color:var(--text-tertiary);font-size:13px;">No known vulnerabilities.</p>
+              {{end}}
+            </div>
+
+            {{if gt .VulnTotal 0}}
+            <!-- Licenses -->
+            <div class="detail-section">
+              <h4>Licenses</h4>
+              {{if .Licenses}}
+              <table>
+                <thead><tr><th>License</th><th>Status</th></tr></thead>
+                <tbody>
+                {{range .Licenses}}
+                  <tr>
+                    <td>{{.Name}}</td>
+                    <td><span class="lic-badge lb-{{.StatusClass}}">{{.StatusClass}}</span></td>
+                  </tr>
+                {{end}}
+                </tbody>
+              </table>
+              {{else}}
+              <p style="color:var(--text-tertiary);font-size:13px;">No license data.</p>
+              {{end}}
+            </div>
+            {{end}}
+
+            <!-- EOL & Version Currency -->
+            <div class="detail-section">
+              <h4>EOL &amp; Version Currency</h4>
+              <div class="eol-placeholder">
+                End-of-life status and upgrade path information will be available in a future release.
+              </div>
+            </div>
+
+            <!-- Source Location -->
+            <div class="detail-section">
+              <h4>Source Location</h4>
+              <p style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary);word-break:break-all;">{{.Locations}}</p>
+            </div>
+          </div>
+        </td>
       </tr>
 {{end}}
     </tbody>
   </table>
-  <p class="footnote" id="vuln-count">Showing {{len .AllVulns}} of {{len .AllVulns}} vulnerabilities</p>
-{{end}}
+  <p class="footnote" id="comp-count">Showing {{len .ComponentDetails}} of {{len .ComponentDetails}} components</p>
 </section>
 
-<section class="accordion">
-  <details>
-    <summary>
-      Composition by Ecosystem <span class="accordion-badge">{{len .Ecosystems}}</span>
-    </summary>
-    <div class="eco-bars">
-{{range .Ecosystems}}
-      <div class="eco-bar-row">
-        <span class="eco-bar-label">{{.Key}}</span>
-        <div class="eco-bar-track"><div class="eco-bar-fill" style="width:{{pctOf .Count $.EcoMax}}%"></div></div>
-        <span class="eco-bar-count">{{.Count}}</span>
-      </div>
-{{end}}
-    </div>
-  </details>
-
-  <details>
-    <summary>
-      License Distribution <span class="accordion-badge">{{.LicUnique}}</span>
-    </summary>
-    <table>
-      <thead><tr><th>License</th><th>Packages</th></tr></thead>
-      <tbody>
-{{if .LicenseDist}}
-{{range .LicenseDist}}
-        <tr><td>{{.Key}}</td><td>{{.Count}}</td></tr>
-{{end}}
-{{else}}
-        <tr><td colspan="2">No license data available</td></tr>
-{{end}}
-      </tbody>
-    </table>
-    <p class="footnote">{{.LicNonSPDX}} non-SPDX license identifiers detected</p>
-  </details>
-
-{{if gt .DeniedTotal 0}}
-  <details>
-    <summary>
-      Denied Components <span class="accordion-badge">{{.DeniedTotal}}</span>
-    </summary>
-    <table>
-      <thead><tr><th>Package</th><th>Version</th><th>License</th></tr></thead>
-      <tbody>
-{{range .DeniedPkgs}}
-        <tr><td>{{.Name}}</td><td>{{.Version}}</td><td>{{.Licenses}}</td></tr>
-{{end}}
-      </tbody>
-    </table>
-{{if gt .DeniedTotal 20}}
-    <p class="footnote">Showing first 20 of {{.DeniedTotal}} denied packages. See full report for details.</p>
-{{end}}
-  </details>
-{{end}}
-
-{{if .Components}}
-  <details id="component-inventory">
-    <summary>
-      Full Component Inventory <span class="accordion-badge">{{len .Components}}</span>
-    </summary>
-    <div>
-      <input type="text" id="comp-filter" class="search-input" placeholder="Filter components...">
-      <table id="comp-table">
-        <thead><tr>
-          <th class="sortable" data-sort="name">Component <span class="sort-icon">&#9650;</span></th>
-          <th class="sortable" data-sort="version">Version <span class="sort-icon">&#9650;</span></th>
-          <th class="sortable" data-sort="ecosystem">Ecosystem <span class="sort-icon">&#9650;</span></th>
-          <th>Source Location</th>
-        </tr></thead>
-        <tbody>
-{{range .Components}}
-          <tr><td>{{.Name}}</td><td><span class="tag">{{.Version}}</span></td><td>{{.Ecosystem}}</td><td style="font-family:'JetBrains Mono',monospace;font-size:13px;">{{.Locations}}</td></tr>
-{{end}}
-        </tbody>
-      </table>
-    </div>
-  </details>
-{{end}}
-</section>
-
-{{if .AllVulns}}
+{{if .ComponentDetails}}
 <script>
 (function(){
-  /* -- Vulnerability filter buttons + text search -- */
-  var filterBtns = document.querySelectorAll('.filter-btn');
-  var vulnRows = document.querySelectorAll('#vuln-table tbody tr');
-  var vulnCount = document.getElementById('vuln-count');
-  var vulnSearch = document.getElementById('vuln-search');
-  var totalVulns = vulnRows.length;
-  var activeSevFilter = 'all';
+  var tbody = document.querySelector('#master-table tbody');
+  var masterRows = document.querySelectorAll('.master-row');
+  var detailRows = document.querySelectorAll('.detail-row');
+  var filterBtns = document.querySelectorAll('.comp-filters .filter-btn');
+  var searchInput = document.getElementById('comp-search');
+  var countEl = document.getElementById('comp-count');
+  var totalComponents = masterRows.length;
+  var activeFilter = 'all';
 
-  function applyFilters() {
-    var q = vulnSearch.value.toLowerCase();
-    var visible = 0;
-    vulnRows.forEach(function(row) {
-      var sev = row.getAttribute('data-sev');
-      var sevMatch;
-      if (activeSevFilter === 'all') {
-        sevMatch = true;
-      } else if (activeSevFilter === 'other') {
-        sevMatch = (sev !== 'critical' && sev !== 'high' && sev !== 'medium' && sev !== 'low');
-      } else {
-        sevMatch = (sev === activeSevFilter);
-      }
-      var textMatch = !q || row.textContent.toLowerCase().indexOf(q) !== -1;
-      if (sevMatch && textMatch) {
-        row.style.display = '';
-        visible++;
-      } else {
-        row.style.display = 'none';
+  /* -- Row pairs: keep master + detail together -- */
+  function getPairs() {
+    var pairs = [];
+    for (var i = 0; i < masterRows.length; i++) {
+      pairs.push({ master: masterRows[i], detail: detailRows[i] });
+    }
+    return pairs;
+  }
+
+  /* -- Expand / Collapse -- */
+  masterRows.forEach(function(row, idx) {
+    row.addEventListener('click', function() {
+      var detail = detailRows[idx];
+      var wasExpanded = row.classList.contains('expanded');
+      /* Collapse all */
+      masterRows.forEach(function(r) { r.classList.remove('expanded'); });
+      detailRows.forEach(function(r) { r.classList.remove('visible'); });
+      /* Toggle this one */
+      if (!wasExpanded) {
+        row.classList.add('expanded');
+        detail.classList.add('visible');
       }
     });
-    vulnCount.textContent = 'Showing ' + visible + ' of ' + totalVulns + ' vulnerabilities';
+  });
+
+  /* -- Filter logic -- */
+  function matchesFilter(master) {
+    if (activeFilter === 'all') return true;
+    var vulns = parseInt(master.getAttribute('data-vulns'), 10);
+    var lic = master.getAttribute('data-lic');
+    if (activeFilter === 'vulns') return vulns > 0;
+    if (activeFilter === 'license') return lic === 'denied' || lic === 'unlicensed';
+    if (activeFilter === 'clean') return vulns === 0 && lic !== 'denied' && lic !== 'unlicensed';
+    return true;
+  }
+
+  function applyFilters() {
+    var q = searchInput.value.toLowerCase();
+    var visible = 0;
+    for (var i = 0; i < masterRows.length; i++) {
+      var master = masterRows[i];
+      var detail = detailRows[i];
+      var filterOk = matchesFilter(master);
+      /* Text search: search across master row AND detail row content (finds CVE IDs) */
+      var textOk = !q || master.textContent.toLowerCase().indexOf(q) !== -1 ||
+                         detail.textContent.toLowerCase().indexOf(q) !== -1;
+      if (filterOk && textOk) {
+        master.style.display = '';
+        /* Keep detail visibility based on expanded state */
+        detail.style.display = '';
+        visible++;
+      } else {
+        master.style.display = 'none';
+        detail.style.display = 'none';
+        master.classList.remove('expanded');
+        detail.classList.remove('visible');
+      }
+    }
+    countEl.textContent = 'Showing ' + visible + ' of ' + totalComponents + ' components';
   }
 
   filterBtns.forEach(function(btn) {
     btn.addEventListener('click', function() {
       filterBtns.forEach(function(b) { b.classList.remove('active'); });
       btn.classList.add('active');
-      activeSevFilter = btn.getAttribute('data-filter');
+      activeFilter = btn.getAttribute('data-filter');
       applyFilters();
     });
   });
 
-  vulnSearch.addEventListener('input', applyFilters);
+  searchInput.addEventListener('input', applyFilters);
 
   /* -- Sortable columns -- */
-  var sortHeaders = document.querySelectorAll('#vuln-table .sortable');
-  var tbody = document.querySelector('#vuln-table tbody');
+  var sortHeaders = document.querySelectorAll('#master-table .sortable');
   var sortState = {};
+  var colMap = { name: 1, version: 2, ecosystem: 3, vulns: 4, license: 5 };
 
   sortHeaders.forEach(function(th) {
     var sortKey = th.getAttribute('data-sort');
@@ -1272,7 +1383,6 @@
       var dir = sortState[sortKey] === 'asc' ? 'desc' : 'asc';
       sortState[sortKey] = dir;
 
-      /* Update sort icons */
       sortHeaders.forEach(function(h) {
         h.classList.remove('sort-active');
         h.querySelector('.sort-icon').innerHTML = '&#9650;';
@@ -1280,18 +1390,20 @@
       th.classList.add('sort-active');
       th.querySelector('.sort-icon').innerHTML = dir === 'asc' ? '&#9650;' : '&#9660;';
 
-      var rows = Array.prototype.slice.call(vulnRows);
-      rows.sort(function(a, b) {
+      var pairs = getPairs();
+      pairs.sort(function(a, b) {
         var valA, valB;
-        if (sortKey === 'severity') {
-          valA = parseInt(a.getAttribute('data-sev-order'), 10);
-          valB = parseInt(b.getAttribute('data-sev-order'), 10);
-        } else if (sortKey === 'package') {
-          valA = a.cells[2].textContent.toLowerCase();
-          valB = b.cells[2].textContent.toLowerCase();
-        } else if (sortKey === 'epss') {
-          valA = parseFloat(a.getAttribute('data-epss')) || 0;
-          valB = parseFloat(b.getAttribute('data-epss')) || 0;
+        if (sortKey === 'vulns') {
+          valA = parseInt(a.master.getAttribute('data-vulns'), 10);
+          valB = parseInt(b.master.getAttribute('data-vulns'), 10);
+        } else if (sortKey === 'license') {
+          var licOrder = { denied: 0, unlicensed: 1, unknown: 2, allowed: 3 };
+          valA = licOrder[a.master.getAttribute('data-lic')] || 2;
+          valB = licOrder[b.master.getAttribute('data-lic')] || 2;
+        } else {
+          var col = colMap[sortKey];
+          valA = a.master.cells[col].textContent.toLowerCase();
+          valB = b.master.cells[col].textContent.toLowerCase();
         }
         var cmp;
         if (typeof valA === 'number') {
@@ -1302,55 +1414,14 @@
         return dir === 'asc' ? cmp : -cmp;
       });
 
-      rows.forEach(function(row) { tbody.appendChild(row); });
-    });
-  });
-})();
-</script>
-{{end}}
-
-{{if .Components}}
-<script>
-(function(){
-  var input = document.getElementById('comp-filter');
-  var rows = document.querySelectorAll('#comp-table tbody tr');
-  input.addEventListener('input', function(){
-    var q = this.value.toLowerCase();
-    rows.forEach(function(row){
-      row.style.display = row.textContent.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
-    });
-  });
-
-  /* -- Sortable columns for component table -- */
-  var sortHeaders = document.querySelectorAll('#comp-table .sortable');
-  var tbody = document.querySelector('#comp-table tbody');
-  var colMap = { name: 0, version: 1, ecosystem: 2 };
-  var sortState = {};
-
-  sortHeaders.forEach(function(th) {
-    var sortKey = th.getAttribute('data-sort');
-    sortState[sortKey] = 'asc';
-
-    th.addEventListener('click', function() {
-      var dir = sortState[sortKey] === 'asc' ? 'desc' : 'asc';
-      sortState[sortKey] = dir;
-
-      sortHeaders.forEach(function(h) {
-        h.classList.remove('sort-active');
-        h.querySelector('.sort-icon').innerHTML = '&#9650;';
+      pairs.forEach(function(p) {
+        tbody.appendChild(p.master);
+        tbody.appendChild(p.detail);
       });
-      th.classList.add('sort-active');
-      th.querySelector('.sort-icon').innerHTML = dir === 'asc' ? '&#9650;' : '&#9660;';
 
-      var col = colMap[sortKey];
-      var rowArr = Array.prototype.slice.call(rows);
-      rowArr.sort(function(a, b) {
-        var valA = a.cells[col].textContent.toLowerCase();
-        var valB = b.cells[col].textContent.toLowerCase();
-        var cmp = valA < valB ? -1 : (valA > valB ? 1 : 0);
-        return dir === 'asc' ? cmp : -cmp;
-      });
-      rowArr.forEach(function(row) { tbody.appendChild(row); });
+      /* Refresh cached node lists */
+      masterRows = document.querySelectorAll('.master-row');
+      detailRows = document.querySelectorAll('.detail-row');
     });
   });
 })();
