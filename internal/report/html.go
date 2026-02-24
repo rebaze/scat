@@ -88,17 +88,18 @@ type htmlData struct {
 }
 
 type vulnRow struct {
-	ID       string
-	Severity string
-	SevClass string
-	SevOrder int
-	Package  string
-	Version  string
-	Fix      string
-	EPSS     string  // formatted display string
-	EPSSPct  string  // percentage for micro-bar width (e.g. "12.3")
-	EPSSRaw  float64 // raw value for sorting
-	InKEV    bool
+	ID         string
+	OriginalID string // original Grype ID when swapped (e.g. GHSA)
+	Severity   string
+	SevClass   string
+	SevOrder   int
+	Package    string
+	Version    string
+	Fix        string
+	EPSS       string  // formatted display string
+	EPSSPct    string  // percentage for micro-bar width (e.g. "12.3")
+	EPSSRaw    float64 // raw value for sorting
+	InKEV      bool
 	KEVDueDate string
 }
 
@@ -338,14 +339,15 @@ func buildAllVulns(vulns *model.VulnReport) []vulnRow {
 			version = "-"
 		}
 		row := vulnRow{
-			ID:       m.Vulnerability.ID,
-			Severity: sev,
-			SevClass: strings.ToLower(sev),
-			SevOrder: severityOrder(sev),
-			Package:  m.Artifact.Name,
-			Version:  version,
-			Fix:      fix,
-			InKEV:    m.Vulnerability.InKEV,
+			ID:         m.Vulnerability.ID,
+			OriginalID: m.Vulnerability.OriginalID,
+			Severity:   sev,
+			SevClass:   strings.ToLower(sev),
+			SevOrder:   severityOrder(sev),
+			Package:    m.Artifact.Name,
+			Version:    version,
+			Fix:        fix,
+			InKEV:      m.Vulnerability.InKEV,
 			KEVDueDate: m.Vulnerability.KEVDueDate,
 		}
 		if m.Vulnerability.EPSS != nil {
@@ -381,6 +383,7 @@ func buildComponentDetails(result *model.ScanResult) []componentDetail {
 		}
 		row := vulnRow{
 			ID:         m.Vulnerability.ID,
+			OriginalID: m.Vulnerability.OriginalID,
 			Severity:   sev,
 			SevClass:   strings.ToLower(sev),
 			SevOrder:   severityOrder(sev),

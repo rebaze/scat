@@ -95,9 +95,18 @@ func convertGrypeMatches(matches *grypeMatch.Matches) model.VulnReport {
 			}
 		}
 
+		// Prefer CVE ID over GHSA for display: swap if a related CVE exists
+		displayID := m.Vulnerability.ID
+		originalID := ""
+		if !strings.HasPrefix(displayID, "CVE-") && len(relatedCVEs) > 0 {
+			originalID = displayID
+			displayID = relatedCVEs[0]
+		}
+
 		report.Matches = append(report.Matches, model.Match{
 			Vulnerability: model.Vulnerability{
-				ID:          m.Vulnerability.ID,
+				ID:          displayID,
+				OriginalID:  originalID,
 				Severity:    severity,
 				DataSource:  dataSource,
 				RelatedCVEs: relatedCVEs,

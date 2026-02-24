@@ -450,6 +450,7 @@
   }
 
   .epss-bar-fill {
+    display: block;
     height: 100%;
     border-radius: 3px;
     transition: width 0.2s ease;
@@ -1472,7 +1473,7 @@
                 <tbody>
                 {{range .Vulns}}
                   <tr>
-                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:12px;">{{if hasPrefix .ID "CVE-"}}<a href="https://euvd.enisa.europa.eu/vulnerability/{{.ID}}" target="_blank" rel="noopener noreferrer">{{.ID}}</a>{{else if hasPrefix .ID "GHSA-"}}<a href="https://github.com/advisories/{{.ID}}" target="_blank" rel="noopener noreferrer">{{.ID}}</a>{{else}}{{.ID}}{{end}}</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:12px;">{{if hasPrefix .ID "CVE-"}}<a href="https://euvd.enisa.europa.eu/vulnerability/{{.ID}}" target="_blank" rel="noopener noreferrer">{{.ID}}</a>{{else if hasPrefix .ID "GHSA-"}}<a href="https://github.com/advisories/{{.ID}}" target="_blank" rel="noopener noreferrer">{{.ID}}</a>{{else}}{{.ID}}{{end}}{{if .OriginalID}}<br><span style="font-size:10px;color:var(--text-tertiary);">{{.OriginalID}}</span>{{end}}</span></td>
                     <td><span class="sev-pill sev-pill-{{.SevClass}}">{{.Severity}}</span></td>
                     <td>{{.Fix}}</td>
                     {{if $.EPSSAvailable}}<td>{{if .EPSS}}<div class="epss-cell"><span class="epss-bar"><span class="epss-bar-fill{{if gt .EPSSRaw 0.5}} epss-high{{else if gt .EPSSRaw 0.1}} epss-medium{{else}} epss-low{{end}}" style="width:{{.EPSSPct}}%"></span></span> {{.EPSS}}</div>{{else}}-{{end}}</td>{{end}}

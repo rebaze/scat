@@ -30,6 +30,7 @@ type Match struct {
 
 type Vulnerability struct {
 	ID          string   `json:"id"`
+	OriginalID  string   `json:"originalId,omitempty"` // original Grype ID when swapped (e.g. GHSA)
 	Severity    string   `json:"severity"`
 	Description string   `json:"description"`
 	DataSource  string   `json:"dataSource"`

@@ -48,7 +48,11 @@ func writeVulnSection(b *strings.Builder, vulns *model.VulnReport) {
 	})
 
 	for _, m := range sorted {
-		b.WriteString(fmt.Sprintf("#### %s — %s\n\n", m.Vulnerability.ID, m.Vulnerability.Severity))
+		idDisplay := m.Vulnerability.ID
+		if m.Vulnerability.OriginalID != "" {
+			idDisplay += " (" + m.Vulnerability.OriginalID + ")"
+		}
+		b.WriteString(fmt.Sprintf("#### %s — %s\n\n", idDisplay, m.Vulnerability.Severity))
 		b.WriteString(fmt.Sprintf("- **Package:** %s %s\n", m.Artifact.Name, m.Artifact.Version))
 
 		fixState := m.Vulnerability.Fix.State
