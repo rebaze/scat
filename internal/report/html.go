@@ -276,6 +276,7 @@ func GenerateHTML(result *model.ScanResult, prefix, outDir, generatedAt, version
 			}
 			return string(result)
 		},
+		"hasPrefix": strings.HasPrefix,
 	}
 
 	tmpl, err := template.New("summary.html.tmpl").Funcs(funcMap).ParseFS(templateFS, "templates/summary.html.tmpl")

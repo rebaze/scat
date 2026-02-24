@@ -67,6 +67,10 @@
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 16px;
+
+    /* Tooltips */
+    --tooltip-bg: #1e293b;
+    --tooltip-text: #f1f5f9;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -82,7 +86,7 @@
   }
 
   .page {
-    max-width: 1100px;
+    max-width: 1260px;
     margin: 0 auto;
     padding: var(--space-2xl) 40px;
     position: relative;
@@ -568,10 +572,10 @@
 
   #master-table th:nth-child(1) { width: 28px; }
   #master-table th:nth-child(3) { width: 100px; }
-  #master-table th:nth-child(4) { width: 100px; }
-  #master-table th:nth-child(5) { width: 160px; }
-  #master-table th:nth-child(6) { width: 110px; }
-  #master-table th:nth-child(7) { width: 90px; }
+  #master-table th:nth-child(4) { width: 110px; }
+  #master-table th:nth-child(5) { width: 170px; }
+  #master-table th:nth-child(6) { width: 120px; }
+  #master-table th:nth-child(7) { width: 120px; white-space: nowrap; }
 
   #master-table td:nth-child(2) {
     overflow: hidden;
@@ -678,6 +682,41 @@
     grid-column: 1 / -1;
   }
 
+  .vuln-table {
+    table-layout: auto;
+  }
+
+  .vuln-table th:nth-child(1) { width: 30%; }
+  .vuln-table th:nth-child(2) { width: 15%; }
+  .vuln-table th:nth-child(3) { width: 20%; }
+  .vuln-table th:nth-child(4) { width: 20%; }
+  .vuln-table th:nth-child(5) { width: 15%; }
+
+  .vuln-table td:first-child {
+    white-space: nowrap;
+  }
+
+  .vuln-table a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .vuln-table a:hover {
+    text-decoration: underline;
+  }
+
+  .detail-section-compact {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .detail-section-compact h4 {
+    margin-bottom: var(--space-xs);
+  }
+
+  .detail-section-compact .eol-placeholder {
+    padding: var(--space-sm);
+    font-size: 12px;
+  }
+
   .eol-placeholder {
     border: 2px dashed var(--border);
     border-radius: var(--radius-sm);
@@ -759,6 +798,200 @@
   .freshness-muted {
     color: var(--text-tertiary);
     font-style: italic;
+  }
+
+  /* Inline help icons with CSS tooltips */
+  .term-help {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: 1px solid var(--text-tertiary);
+    color: var(--text-tertiary);
+    font-size: 10px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    cursor: help;
+    position: relative;
+    vertical-align: middle;
+    margin-left: 4px;
+    line-height: 1;
+    transition: color 0.15s ease, border-color 0.15s ease;
+    flex-shrink: 0;
+  }
+
+  .term-help:hover, .term-help:focus {
+    color: var(--text-secondary);
+    border-color: var(--text-secondary);
+    outline: none;
+  }
+
+  .term-help::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--tooltip-bg);
+    color: var(--tooltip-text);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.5;
+    white-space: normal;
+    width: 240px;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  .term-help::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--tooltip-bg);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    z-index: 100;
+  }
+
+  .term-help:hover::after, .term-help:focus::after,
+  .term-help:hover::before, .term-help:focus::before {
+    opacity: 1;
+  }
+
+  /* Glossary toggle button */
+  .glossary-toggle {
+    position: absolute;
+    top: var(--space-2xl);
+    right: 84px;
+    height: 36px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+    z-index: 20;
+  }
+
+  .glossary-toggle:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  .glossary-toggle svg {
+    flex-shrink: 0;
+  }
+
+  /* Glossary modal overlay */
+  .glossary-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  .glossary-overlay.visible {
+    display: flex;
+  }
+
+  .glossary-panel {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: var(--space-xl);
+  }
+
+  .glossary-panel h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: var(--space-lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .glossary-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s ease, background 0.15s ease;
+  }
+
+  .glossary-close:hover {
+    color: var(--text-primary);
+    background: var(--accent-light);
+  }
+
+  .glossary-group {
+    margin-bottom: var(--space-lg);
+  }
+
+  .glossary-group:last-child {
+    margin-bottom: 0;
+  }
+
+  .glossary-group h4 {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-tertiary);
+    margin-bottom: var(--space-sm);
+    padding-bottom: var(--space-xs);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .glossary-group dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-xs) var(--space-md);
+  }
+
+  .glossary-group dt {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-primary);
+    padding: 2px 0;
+  }
+
+  .glossary-group dd {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    padding: 2px 0;
   }
 
   .comp-filters {
@@ -856,6 +1089,9 @@
       --low-text: #86EFAC;
       --negligible-bg: rgba(100,116,139,0.15);
       --negligible-text: #94a3b8;
+
+      --tooltip-bg: #f1f5f9;
+      --tooltip-text: #0f172a;
     }
 
     :root:not([data-theme="light"]) .search-input {
@@ -904,6 +1140,9 @@
     --low-text: #86EFAC;
     --negligible-bg: rgba(100,116,139,0.15);
     --negligible-text: #94a3b8;
+
+    --tooltip-bg: #f1f5f9;
+    --tooltip-text: #0f172a;
   }
 
   :root[data-theme="dark"] .search-input {
@@ -982,7 +1221,7 @@
     .card { box-shadow: none; border-top-width: 3px; }
     .card:hover { transform: none; }
     tbody tr:hover { background: none; }
-    .comp-filters, .search-input, .theme-toggle { display: none; }
+    .comp-filters, .search-input, .theme-toggle, .glossary-toggle, .glossary-overlay, .term-help { display: none; }
     .detail-row { display: table-row !important; }
     .detail-row td { border-bottom: 1px solid var(--border); }
     .master-row .expand-chevron { display: none; }
@@ -1041,6 +1280,11 @@
   <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
 </button>
 
+<button class="glossary-toggle" onclick="toggleGlossary()" aria-label="Open glossary">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+  Glossary
+</button>
+
 {{if not .Unbranded}}
 <div class="report-logo">
   <img src="{{.LogoHeader}}" alt="Rebaze">
@@ -1069,7 +1313,7 @@
       Components
     </div>
     <div class="value">{{.TotalComponents}}</div>
-    <div class="sub">in SBOM</div>
+    <div class="sub">in SBOM <span class="term-help" tabindex="0" data-tip="Software Bill of Materials — a complete inventory of all third-party libraries and packages found in the project.">?</span></div>
   </div>
   <div class="card card--vulns">
     <div class="label">
@@ -1090,7 +1334,7 @@
   <div class="card card--risk">
     <div class="label">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      Risk Level
+      Risk Level <span class="term-help" tabindex="0" data-tip="An overall security risk rating computed from vulnerability severity counts. Critical or High vulnerabilities push the rating up.">?</span>
     </div>
     <div class="value"><span class="risk-badge" style="background:{{.Risk.Color}}">{{.Risk.Label}}</span></div>
     <div class="sub">{{.LicUnique}} unique licenses</div>
@@ -1126,14 +1370,14 @@
     <div class="overview-panel">
       {{if .KEVAvailable}}
       <div>
-        <div class="overview-stat-label">CISA KEV</div>
+        <div class="overview-stat-label">CISA KEV <span class="term-help" tabindex="0" data-tip="Known Exploited Vulnerabilities — a curated CISA list of vulnerabilities confirmed to be actively exploited in the wild.">?</span></div>
         <div class="overview-stat-value">{{.KEVCount}}</div>
         <div class="overview-stat-sub">known exploited</div>
       </div>
       {{end}}
       {{if .EPSSAvailable}}
       <div>
-        <div class="overview-stat-label">EPSS max</div>
+        <div class="overview-stat-label">EPSS max <span class="term-help" tabindex="0" data-tip="Exploit Prediction Scoring System — estimates the probability (0–100%) that a vulnerability will be exploited within 30 days.">?</span></div>
         <div class="overview-stat-value">{{if .MaxEPSS}}{{.MaxEPSS}}{{else}}-{{end}}</div>
         <div class="overview-stat-sub">exploit probability</div>
       </div>
@@ -1143,7 +1387,7 @@
 
     <div class="overview-panel">
       <div>
-        <div class="overview-stat-label">Fix Status</div>
+        <div class="overview-stat-label">Fix Status <span class="term-help" tabindex="0" data-tip="How many vulnerabilities have a patched version available. &quot;Fixed&quot; means an upgrade path exists in the ecosystem.">?</span></div>
         <div class="overview-stat-value">{{.FixedCount}}<span style="font-size:14px;font-weight:500;color:var(--text-secondary)"> / {{.Sev.Total}}</span></div>
         <div class="overview-stat-sub">fixes available</div>
       </div>
@@ -1182,10 +1426,10 @@
       <th></th>
       <th class="sortable" data-sort="name">Component <span class="sort-icon">&#9650;</span></th>
       <th class="sortable" data-sort="version">Version <span class="sort-icon">&#9650;</span></th>
-      <th class="sortable" data-sort="ecosystem">Ecosystem <span class="sort-icon">&#9650;</span></th>
-      <th class="sortable" data-sort="vulns">Vulnerabilities <span class="sort-icon">&#9650;</span></th>
-      <th class="sortable" data-sort="license">License <span class="sort-icon">&#9650;</span></th>
-      <th>Freshness</th>
+      <th class="sortable" data-sort="ecosystem">Ecosystem <span class="term-help" tabindex="0" data-tip="The package manager or platform this component belongs to (e.g., npm, Maven, PyPI, Go modules).">?</span> <span class="sort-icon">&#9650;</span></th>
+      <th class="sortable" data-sort="vulns">Vulnerabilities <span class="term-help" tabindex="0" data-tip="Known security flaws (CVEs) affecting this component version. Colored pills show counts by severity level.">?</span> <span class="sort-icon">&#9650;</span></th>
+      <th class="sortable" data-sort="license">License <span class="term-help" tabindex="0" data-tip="Whether the component's open-source license is approved (allowed), prohibited (denied), missing (unlicensed), or undetectable (unknown).">?</span> <span class="sort-icon">&#9650;</span></th>
+      <th>Freshness <span class="term-help" tabindex="0" data-tip="How current the component version is relative to the latest release. Coming in a future version.">?</span></th>
     </tr></thead>
     <tbody>
 {{range .ComponentDetails}}
@@ -1214,21 +1458,21 @@
         <td colspan="7">
           <div class="detail-panel">
             <!-- Vulnerabilities -->
-            <div class="detail-section{{if eq .VulnTotal 0}} detail-section-full{{end}}">
+            <div class="detail-section detail-section-full">
               <h4>Vulnerabilities ({{.VulnTotal}})</h4>
               {{if gt .VulnTotal 0}}
-              <table>
+              <table class="vuln-table">
                 <thead><tr>
                   <th>CVE / ID</th>
                   <th>Severity</th>
                   <th>Fix</th>
-                  {{if $.EPSSAvailable}}<th>EPSS</th>{{end}}
-                  {{if $.KEVAvailable}}<th>KEV</th>{{end}}
+                  {{if $.EPSSAvailable}}<th>EPSS <span class="term-help" tabindex="0" data-tip="Probability of exploitation within 30 days.">?</span></th>{{end}}
+                  {{if $.KEVAvailable}}<th>KEV <span class="term-help" tabindex="0" data-tip="CISA Known Exploited Vulnerabilities — confirmed active exploitation.">?</span></th>{{end}}
                 </tr></thead>
                 <tbody>
                 {{range .Vulns}}
                   <tr>
-                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:12px;">{{.ID}}</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:12px;">{{if hasPrefix .ID "CVE-"}}<a href="https://euvd.enisa.europa.eu/vulnerability/{{.ID}}" target="_blank" rel="noopener noreferrer">{{.ID}}</a>{{else if hasPrefix .ID "GHSA-"}}<a href="https://github.com/advisories/{{.ID}}" target="_blank" rel="noopener noreferrer">{{.ID}}</a>{{else}}{{.ID}}{{end}}</span></td>
                     <td><span class="sev-pill sev-pill-{{.SevClass}}">{{.Severity}}</span></td>
                     <td>{{.Fix}}</td>
                     {{if $.EPSSAvailable}}<td>{{if .EPSS}}<div class="epss-cell"><span class="epss-bar"><span class="epss-bar-fill{{if gt .EPSSRaw 0.5}} epss-high{{else if gt .EPSSRaw 0.1}} epss-medium{{else}} epss-low{{end}}" style="width:{{.EPSSPct}}%"></span></span> {{.EPSS}}</div>{{else}}-{{end}}</td>{{end}}
@@ -1242,9 +1486,8 @@
               {{end}}
             </div>
 
-            {{if gt .VulnTotal 0}}
             <!-- Licenses -->
-            <div class="detail-section">
+            <div class="detail-section detail-section-full">
               <h4>Licenses</h4>
               {{if .Licenses}}
               <table>
@@ -1262,10 +1505,9 @@
               <p style="color:var(--text-tertiary);font-size:13px;">No license data.</p>
               {{end}}
             </div>
-            {{end}}
 
             <!-- EOL & Version Currency -->
-            <div class="detail-section">
+            <div class="detail-section detail-section-compact">
               <h4>EOL &amp; Version Currency</h4>
               <div class="eol-placeholder">
                 End-of-life status and upgrade path information will be available in a future release.
@@ -1273,7 +1515,7 @@
             </div>
 
             <!-- Source Location -->
-            <div class="detail-section">
+            <div class="detail-section detail-section-compact">
               <h4>Source Location</h4>
               <p style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary);word-break:break-all;">{{.Locations}}</p>
             </div>
@@ -1438,6 +1680,81 @@
   <div class="footer-text">&copy; 2026 rebaze GmbH</div>
 </footer>
 {{end}}
+
+<!-- Glossary Modal -->
+<div class="glossary-overlay" id="glossary-overlay" onclick="if(event.target===this)toggleGlossary()">
+  <div class="glossary-panel" role="dialog" aria-label="Glossary">
+    <h3>Glossary <button class="glossary-close" onclick="toggleGlossary()" aria-label="Close glossary">&times;</button></h3>
+    <div class="glossary-group">
+      <h4>General</h4>
+      <dl>
+        <dt>SBOM</dt>
+        <dd>Software Bill of Materials — a complete inventory of all third-party libraries and packages found in the project.</dd>
+        <dt>Risk Level</dt>
+        <dd>An overall security risk rating computed from vulnerability severity counts. Critical or High vulnerabilities push the rating up.</dd>
+        <dt>Ecosystem</dt>
+        <dd>The package manager or platform a component belongs to (e.g., npm, Maven, PyPI, Go modules).</dd>
+        <dt>Freshness</dt>
+        <dd>How current the component version is relative to the latest release. Coming in a future version.</dd>
+      </dl>
+    </div>
+    <div class="glossary-group">
+      <h4>Vulnerabilities</h4>
+      <dl>
+        <dt>CVE</dt>
+        <dd>Common Vulnerabilities and Exposures — a unique identifier assigned to a publicly disclosed security flaw.</dd>
+        <dt>CISA KEV</dt>
+        <dd>Known Exploited Vulnerabilities — a curated CISA list of vulnerabilities confirmed to be actively exploited in the wild.</dd>
+        <dt>EPSS</dt>
+        <dd>Exploit Prediction Scoring System — estimates the probability (0–100%) that a vulnerability will be exploited within 30 days.</dd>
+        <dt>CVSS</dt>
+        <dd>Common Vulnerability Scoring System — a standardized score (0–10) rating the technical severity of a vulnerability.</dd>
+        <dt>Fix Status</dt>
+        <dd>How many vulnerabilities have a patched version available. "Fixed" means an upgrade path exists in the ecosystem.</dd>
+      </dl>
+    </div>
+    <div class="glossary-group">
+      <h4>Severity Levels</h4>
+      <dl>
+        <dt>Critical (9.0–10.0)</dt>
+        <dd>Easily exploitable flaws that can lead to full system compromise, often with no user interaction required.</dd>
+        <dt>High (7.0–8.9)</dt>
+        <dd>Serious vulnerabilities that can compromise confidentiality, integrity, or availability with limited complexity.</dd>
+        <dt>Medium (4.0–6.9)</dt>
+        <dd>Moderate-impact vulnerabilities that typically require specific conditions or user interaction to exploit.</dd>
+        <dt>Low (0.1–3.9)</dt>
+        <dd>Minor issues with limited impact, usually requiring local access or unlikely attack scenarios.</dd>
+      </dl>
+    </div>
+    <div class="glossary-group">
+      <h4>License Statuses</h4>
+      <dl>
+        <dt>Allowed</dt>
+        <dd>The component's license is approved for use in your project according to the configured license policy.</dd>
+        <dt>Denied</dt>
+        <dd>The component's license is prohibited by the configured policy and should be replaced or removed.</dd>
+        <dt>Unlicensed</dt>
+        <dd>No license information was found for this component, which may pose legal risks for redistribution.</dd>
+        <dt>Unknown</dt>
+        <dd>The license was detected but could not be classified against the configured policy.</dd>
+      </dl>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleGlossary() {
+  document.getElementById('glossary-overlay').classList.toggle('visible');
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    var overlay = document.getElementById('glossary-overlay');
+    if (overlay.classList.contains('visible')) {
+      overlay.classList.remove('visible');
+    }
+  }
+});
+</script>
 
 <script>
 function toggleTheme() {
