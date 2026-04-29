@@ -40,14 +40,14 @@ var rootCmd = &cobra.Command{
 	Long:  "A single-command tool for SBOM generation, vulnerability scanning, license checking, and reporting.",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {
-			return fmt.Errorf("requires a path to a project directory or a PURL list file")
+			return fmt.Errorf("requires a path to a project directory, a CycloneDX SBOM JSON, or a PURL list file")
 		}
 		if len(args) > 1 {
 			return fmt.Errorf("accepts only one path, but received %d", len(args))
 		}
 		return nil
 	},
-	RunE:  runAnalyze,
+	RunE: runAnalyze,
 }
 
 func init() {
@@ -67,10 +67,6 @@ func Execute() error {
 
 func runAnalyze(cmd *cobra.Command, args []string) error {
 	target := args[0]
-	info, err := os.Stat(target)
-	if err != nil {
-		return fmt.Errorf("cannot access '%s': %w", target, err)
-	}
 
 	switch format {
 	case "html", "markdown":
@@ -78,30 +74,51 @@ func runAnalyze(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("unsupported format %q; valid: html, markdown", format)
 	}
 
+	kind, err := scan.DetectInputKind(target)
+	if err != nil {
+		return err
+	}
+
 	var absFolder string
 	var purlFile string
+	var sbomInput string
 	var prefix string
 
-	if info.IsDir() {
+	switch kind {
+	case scan.InputDirectory:
 		af, err := filepath.Abs(target)
 		if err != nil {
 			return fmt.Errorf("resolving path: %w", err)
 		}
 		absFolder = af
 		prefix = filepath.Base(absFolder)
-	} else if info.Mode().IsRegular() {
+	case scan.InputCycloneDX:
+		af, err := filepath.Abs(target)
+		if err != nil {
+			return fmt.Errorf("resolving path: %w", err)
+		}
+		sbomInput = af
+		base := filepath.Base(sbomInput)
+		prefix = strings.TrimSuffix(base, filepath.Ext(base))
+		prefix = strings.TrimSuffix(prefix, "-sbom")
+	case scan.InputSPDX:
+		return fmt.Errorf("SPDX SBOMs are not supported yet; please convert to CycloneDX")
+	case scan.InputPURLList:
 		purlFile = target
 		base := filepath.Base(purlFile)
 		prefix = strings.TrimSuffix(base, filepath.Ext(base))
-	} else {
-		return fmt.Errorf("'%s' is neither a directory nor a regular file", target)
+	default:
+		return fmt.Errorf("could not classify input '%s'", target)
 	}
 
 	// Compute scan metadata from the target
 	var metadata *model.ScanMetadata
-	if absFolder != "" {
+	switch {
+	case absFolder != "":
 		metadata = computeDirMetadata(absFolder)
-	} else {
+	case sbomInput != "":
+		metadata = computeFileMetadata(sbomInput)
+	default:
 		metadata = computeFileMetadata(purlFile)
 	}
 
@@ -125,6 +142,11 @@ func runAnalyze(cmd *cobra.Command, args []string) error {
 	}
 
 	sbomPath := filepath.Join(outDir, prefix+"-sbom.json")
+	if sbomInput != "" {
+		if absSBOMPath, err := filepath.Abs(sbomPath); err == nil && absSBOMPath == sbomInput {
+			sbomPath = filepath.Join(outDir, prefix+"-sbom.work.json")
+		}
+	}
 	vulnPath := filepath.Join(outDir, prefix+"-vulns.json")
 	licensePath := filepath.Join(outDir, prefix+"-licenses.json")
 
@@ -134,14 +156,22 @@ func runAnalyze(cmd *cobra.Command, args []string) error {
 	var htmlPath string
 
 	var sbomStep tui.Step
-	if purlFile != "" {
+	switch {
+	case sbomInput != "":
+		sbomStep = tui.Step{
+			Name: "Loading provided SBOM",
+			Run: func() error {
+				return scan.IngestSBOM(sbomInput, sbomPath)
+			},
+		}
+	case purlFile != "":
 		sbomStep = tui.Step{
 			Name: "Creating inventory from PURLs",
 			Run: func() error {
 				return scan.CreateSBOMFromPURLs(purlFile, sbomPath)
 			},
 		}
-	} else {
+	default:
 		sbomStep = tui.Step{
 			Name: "Generating component inventory",
 			Run: func() error {
