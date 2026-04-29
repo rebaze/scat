@@ -11,6 +11,7 @@ type SBOM struct {
 
 type Component struct {
 	Name      string   `json:"name"`
+	Namespace string   `json:"namespace,omitempty"` // CycloneDX group / PURL namespace (e.g. Maven groupId, npm scope)
 	Version   string   `json:"version"`
 	Type      string   `json:"type"`
 	PURL      string   `json:"purl"`
@@ -50,8 +51,10 @@ type VulnFix struct {
 }
 
 type Artifact struct {
-	Name    string `json:"name"`
-	Version string `json:"version"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace,omitempty"` // PURL namespace (Maven groupId, npm scope, etc.)
+	Version   string `json:"version"`
+	PURL      string `json:"purl,omitempty"`
 }
 
 // Grant license report

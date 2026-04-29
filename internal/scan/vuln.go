@@ -14,6 +14,7 @@ import (
 	"github.com/anchore/grype/grype/matcher"
 	grypePkg "github.com/anchore/grype/grype/pkg"
 	"github.com/anchore/grype/grype/vulnerability"
+	"github.com/package-url/packageurl-go"
 	"github.com/rebaze/scat/internal/model"
 	"github.com/rebaze/scat/internal/output"
 )
@@ -75,6 +76,18 @@ func (db *VulnDB) Scan(sbomPath, outPath string, verbose bool) error {
 	return output.WriteJSON(outPath, report)
 }
 
+// namespaceFromPURL returns the PURL namespace component, or "" when absent or unparseable.
+func namespaceFromPURL(purl string) string {
+	if purl == "" {
+		return ""
+	}
+	p, err := packageurl.FromString(purl)
+	if err != nil {
+		return ""
+	}
+	return p.Namespace
+}
+
 func convertGrypeMatches(matches *grypeMatch.Matches) model.VulnReport {
 	var report model.VulnReport
 	if matches == nil {
@@ -115,8 +128,10 @@ func convertGrypeMatches(matches *grypeMatch.Matches) model.VulnReport {
 				},
 			},
 			Artifact: model.Artifact{
-				Name:    m.Package.Name,
-				Version: m.Package.Version,
+				Name:      m.Package.Name,
+				Namespace: namespaceFromPURL(m.Package.PURL),
+				Version:   m.Package.Version,
+				PURL:      m.Package.PURL,
 			},
 		})
 	}

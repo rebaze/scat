@@ -8,6 +8,7 @@ require (
 	github.com/anchore/syft v1.43.0
 	github.com/charmbracelet/bubbles v1.0.0
 	github.com/charmbracelet/bubbletea v1.3.10
+	github.com/package-url/packageurl-go v0.1.5
 	github.com/spf13/cobra v1.10.2
 )
 
@@ -222,7 +223,6 @@ require (
 	github.com/opencontainers/runtime-spec v1.3.0 // indirect
 	github.com/opencontainers/selinux v1.13.1 // indirect
 	github.com/openvex/go-vex v0.2.8 // indirect
-	github.com/package-url/packageurl-go v0.1.5 // indirect
 	github.com/pandatix/go-cvss v0.6.2 // indirect
 	github.com/pborman/indent v1.2.1 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect

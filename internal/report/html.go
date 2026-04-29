@@ -387,7 +387,7 @@ func buildComponentDetails(result *model.ScanResult) []componentDetail {
 			Severity:   sev,
 			SevClass:   strings.ToLower(sev),
 			SevOrder:   severityOrder(sev),
-			Package:    m.Artifact.Name,
+			Package:    FormatComponentID(m.Artifact.Namespace, m.Artifact.Name, m.Artifact.PURL),
 			Version:    version,
 			Fix:        fix,
 			InKEV:      m.Vulnerability.InKEV,
@@ -398,7 +398,7 @@ func buildComponentDetails(result *model.ScanResult) []componentDetail {
 			row.EPSS = fmt.Sprintf("%.1f%%", *m.Vulnerability.EPSS*100)
 			row.EPSSPct = fmt.Sprintf("%.1f", *m.Vulnerability.EPSS*100)
 		}
-		key := strings.ToLower(m.Artifact.Name) + "@" + m.Artifact.Version
+		key := FormatComponentIDLower(m.Artifact.Namespace, m.Artifact.Name, m.Artifact.PURL) + "@" + m.Artifact.Version
 		vulnIndex[key] = append(vulnIndex[key], row)
 	}
 
@@ -444,7 +444,7 @@ func buildComponentDetails(result *model.ScanResult) []componentDetail {
 		eco := extractPURLScheme(c.PURL)
 
 		d := componentDetail{
-			Name:           c.Name,
+			Name:           FormatComponentID(c.Namespace, c.Name, c.PURL),
 			Version:        c.Version,
 			Ecosystem:      eco,
 			Locations:      loc,
@@ -455,9 +455,11 @@ func buildComponentDetails(result *model.ScanResult) []componentDetail {
 			VersionsBehind: "n/a",
 		}
 
-		// Merge vulns
-		key := strings.ToLower(c.Name) + "@" + c.Version
-		if vulns, ok := vulnIndex[key]; ok {
+		// Merge vulns — keyed by namespace+name@version to disambiguate same-named components from different groups
+		vulnKey := FormatComponentIDLower(c.Namespace, c.Name, c.PURL) + "@" + c.Version
+		// Merge licenses — license findings don't carry namespace, so key on bare name
+		licKey := strings.ToLower(c.Name) + "@" + c.Version
+		if vulns, ok := vulnIndex[vulnKey]; ok {
 			// Sort vulns by severity
 			sort.Slice(vulns, func(i, j int) bool {
 				return vulns[i].SevOrder < vulns[j].SevOrder
@@ -485,7 +487,7 @@ func buildComponentDetails(result *model.ScanResult) []componentDetail {
 		}
 
 		// Merge licenses
-		if li, ok := licIndex[key]; ok {
+		if li, ok := licIndex[licKey]; ok {
 			d.Licenses = li.Licenses
 			d.LicenseStatus = li.Status
 		}

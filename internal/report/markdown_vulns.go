@@ -53,7 +53,7 @@ func writeVulnSection(b *strings.Builder, vulns *model.VulnReport) {
 			idDisplay += " (" + m.Vulnerability.OriginalID + ")"
 		}
 		b.WriteString(fmt.Sprintf("#### %s — %s\n\n", idDisplay, m.Vulnerability.Severity))
-		b.WriteString(fmt.Sprintf("- **Package:** %s %s\n", m.Artifact.Name, m.Artifact.Version))
+		b.WriteString(fmt.Sprintf("- **Package:** %s %s\n", FormatComponentID(m.Artifact.Namespace, m.Artifact.Name, m.Artifact.PURL), m.Artifact.Version))
 
 		fixState := m.Vulnerability.Fix.State
 		if fixState == "" {

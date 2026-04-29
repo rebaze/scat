@@ -84,6 +84,7 @@ type cdxSBOMWithProps struct {
 
 type cdxComponentProps struct {
 	Name       string        `json:"name"`
+	Group      string        `json:"group"`
 	Version    string        `json:"version"`
 	Type       string        `json:"type"`
 	PURL       string        `json:"purl"`
@@ -115,10 +116,11 @@ func LoadSBOM(path string) (*model.SBOM, error) {
 
 	for _, c := range raw.Components {
 		comp := model.Component{
-			Name:    c.Name,
-			Version: c.Version,
-			Type:    c.Type,
-			PURL:    c.PURL,
+			Name:      c.Name,
+			Namespace: c.Group,
+			Version:   c.Version,
+			Type:      c.Type,
+			PURL:      c.PURL,
 		}
 		for _, p := range c.Properties {
 			if strings.HasPrefix(p.Name, "syft:location:") && strings.HasSuffix(p.Name, ":path") {

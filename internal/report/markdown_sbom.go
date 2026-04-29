@@ -61,13 +61,14 @@ func writeSBOMSection(b *strings.Builder, sbom *model.SBOM) {
 
 	// Component List
 	b.WriteString("### Component List\n\n")
-	b.WriteString("| Name | Version | Type | PURL |\n")
-	b.WriteString("|------|---------|------|------|\n")
+	b.WriteString("| Component | Version | Type | PURL |\n")
+	b.WriteString("|-----------|---------|------|------|\n")
 
 	sorted := make([]model.Component, len(sbom.Components))
 	copy(sorted, sbom.Components)
 	sort.Slice(sorted, func(i, j int) bool {
-		return strings.ToLower(sorted[i].Name) < strings.ToLower(sorted[j].Name)
+		return FormatComponentIDLower(sorted[i].Namespace, sorted[i].Name, sorted[i].PURL) <
+			FormatComponentIDLower(sorted[j].Namespace, sorted[j].Name, sorted[j].PURL)
 	})
 	for _, c := range sorted {
 		version := c.Version
@@ -82,7 +83,7 @@ func writeSBOMSection(b *strings.Builder, sbom *model.SBOM) {
 		if purl == "" {
 			purl = "-"
 		}
-		b.WriteString(fmt.Sprintf("| %s | %s | %s | %s |\n", c.Name, version, typ, purl))
+		b.WriteString(fmt.Sprintf("| %s | %s | %s | %s |\n", FormatComponentID(c.Namespace, c.Name, c.PURL), version, typ, purl))
 	}
 	b.WriteString("\n")
 }
