@@ -2,6 +2,9 @@ name: Verify Release App
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - chore/release-app-token
 
 permissions:
   contents: read
