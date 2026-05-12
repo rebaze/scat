@@ -9,10 +9,89 @@ permissions:
   contents: read
 
 jobs:
-  goreleaser:
+  release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
+        with:
+          go-version-file: go.mod
+
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@v0
+
+      - name: Run GoReleaser (skip homebrew tap)
+        uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
+        with:
+          version: "~> v2"
+          args: release --clean --skip=homebrew
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate source CycloneDX SBOM
+        shell: bash
+        run: |
+          set -euo pipefail
+          syft dir:. --output "cyclonedx-json=dist/scat-${GITHUB_REF_NAME}-source.cdx.json"
+
+      - name: Upload SBOM to GitHub release
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release upload "$TAG" "dist/scat-${TAG}-source.cdx.json" --clobber
+
+      - name: Attest build provenance for release archives
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            dist/*.tar.gz
+            dist/*.zip
+            dist/checksums.txt
+
+      - name: Attest source SBOM (CycloneDX) against all archives
+        uses: actions/attest-sbom@v2
+        with:
+          subject-path: |
+            dist/*.tar.gz
+            dist/*.zip
+          sbom-path: dist/scat-${{ github.ref_name }}-source.cdx.json
+
+      - name: Verify attestations (CI gate)
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for f in dist/*.tar.gz dist/*.zip dist/checksums.txt; do
+            echo "Verifying $f"
+            gh attestation verify "$f" --repo "${GITHUB_REPOSITORY}"
+          done
+
+      - name: Upload dist/ for downstream jobs
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  publish-tap:
+    needs: release
+    runs-on: ubuntu-latest
+    # Skip pre-release tags (e.g. v1.2.3-rc1) — they are for testing the
+    # pipeline and must NOT overwrite the production cask in rebaze/homebrew-tap.
+    if: ${{ !contains(github.ref_name, '-') }}
+    permissions:
+      contents: read
     steps:
       - name: Mint App token
         id: app-token
@@ -23,19 +102,68 @@ jobs:
           owner: rebaze
           repositories: homebrew-tap
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Download dist/
+        uses: actions/download-artifact@v4
         with:
-          fetch-depth: 0
+          name: dist
+          path: dist
 
-      - uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6.2.0
-        with:
-          go-version-file: go.mod
-
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
-        with:
-          version: "~> v2"
-          args: release --clean
+      - name: Bump scat cask in rebaze/homebrew-tap
+        shell: bash
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HOMEBREW_TAP_TOKEN: ${{ steps.app-token.outputs.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          VERSION="${TAG#v}"
+
+          sha_for() {
+            grep " $1\$" dist/checksums.txt | awk '{print $1}'
+          }
+
+          SHA_ARM=$(sha_for "scat_${VERSION}_darwin_arm64.tar.gz")
+          SHA_AMD=$(sha_for "scat_${VERSION}_darwin_amd64.tar.gz")
+
+          if [[ -z "$SHA_ARM" || -z "$SHA_AMD" ]]; then
+            echo "could not resolve darwin checksums from dist/checksums.txt" >&2
+            cat dist/checksums.txt >&2
+            exit 1
+          fi
+
+          cat > scat.rb <<EOF
+          cask "scat" do
+            desc "Software Composition Analysis CLI — SBOM, vulnerability, and license scanning"
+            homepage "https://github.com/rebaze/scat"
+            version "${VERSION}"
+
+            on_macos do
+              on_arm do
+                url "https://github.com/rebaze/scat/releases/download/v#{version}/scat_#{version}_darwin_arm64.tar.gz"
+                sha256 "${SHA_ARM}"
+
+                binary "scat"
+              end
+              on_intel do
+                url "https://github.com/rebaze/scat/releases/download/v#{version}/scat_#{version}_darwin_amd64.tar.gz"
+                sha256 "${SHA_AMD}"
+
+                binary "scat"
+              end
+            end
+          end
+          EOF
+
+          git clone --depth=1 \
+            "https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/rebaze/homebrew-tap.git" tap
+          mkdir -p tap/Casks
+          mv scat.rb tap/Casks/scat.rb
+          cd tap
+          git config user.name "rebaze-release-bot"
+          git config user.email "release-bot@rebaze.com"
+          git add Casks/scat.rb
+          if git diff --cached --quiet; then
+            echo "cask already up to date"
+            exit 0
+          fi
+          git commit -m "scat ${VERSION}"
+          git push
