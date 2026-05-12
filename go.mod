@@ -5,7 +5,7 @@ go 1.25.8
 require (
 	github.com/anchore/clio v0.1.0
 	github.com/anchore/grype v0.111.1
-	github.com/anchore/syft v1.43.0
+	github.com/anchore/syft v1.44.0
 	github.com/charmbracelet/bubbles v1.0.0
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/package-url/packageurl-go v0.1.5
