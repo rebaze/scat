@@ -39,15 +39,17 @@ SBOM, and offer no build provenance.
 
 ## Verification
 
-See the design doc at `~/.claude/plans/i-want-to-level-wiggly-donut.md` for the
-full verification plan. Headline tests:
+Headline tests:
 
-1. Push a `v0.0.0-slsa-test` pre-release tag; confirm both jobs run, the verify
-   gate passes, the tap is bumped, and `gh attestation list --repo rebaze/scat`
-   shows entries.
-2. Negative test: temporarily break the verify step on a throwaway tag and
+1. Push a pre-release tag (e.g. `v0.0.0-rc1`); confirm the `release` job runs
+   end-to-end (build + attest + verify gate green) and the `publish-tap` job is
+   **skipped** by design — pre-release tags must not touch the production
+   Homebrew tap. `gh attestation list --repo rebaze/scat` should show entries.
+2. Cut a real (non-pre-release) tag; confirm `publish-tap` runs and bumps the
+   cask in `rebaze/homebrew-tap`.
+3. Negative test: temporarily break the verify step on a throwaway tag and
    confirm `publish-tap` does NOT run.
-3. From a clean machine: `gh release download` then
+4. From a clean machine: `gh release download` then
    `gh attestation verify` and `cosign verify-attestation` — both must succeed.
 
 Close this task once a real tagged release ships with all checks green.

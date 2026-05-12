@@ -84,11 +84,17 @@ gh attestation verify scat_<version>_<os>_<arch>.tar.gz --repo rebaze/scat
 cosign verify-attestation \
   --type slsaprovenance1 \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  --certificate-identity-regexp "^https://github.com/rebaze/scat/.github/workflows/release.yaml@refs/tags/" \
+  --certificate-identity-regexp "^https://github\.com/rebaze/scat/\.github/workflows/release\.yaml@refs/tags/" \
   scat_<version>_<os>_<arch>.tar.gz
 ```
 
-The CycloneDX SBOM (`scat-v<version>-source.cdx.json`) attached to each release is similarly attested and can be verified with `gh attestation verify --predicate-type https://cyclonedx.org/bom`.
+The CycloneDX SBOM (`scat-v<version>-source.cdx.json`) is attested against the release archives as subjects (not against the SBOM file itself). To verify the SBOM attestation, run `gh attestation verify` against a release **archive** with the CycloneDX predicate type:
+
+```bash
+gh attestation verify scat_<version>_<os>_<arch>.tar.gz \
+  --repo rebaze/scat \
+  --predicate-type https://cyclonedx.org/bom
+```
 
 ## CLI Reference
 

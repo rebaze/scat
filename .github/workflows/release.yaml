@@ -25,7 +25,7 @@ jobs:
           go-version-file: go.mod
 
       - name: Install Syft
-        uses: anchore/sbom-action/download-syft@v0
+        uses: anchore/sbom-action/download-syft@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
 
       - name: Run GoReleaser (skip homebrew tap)
         uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
@@ -39,7 +39,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          syft dir:. --output "cyclonedx-json=dist/scat-${GITHUB_REF_NAME}-source.cdx.json"
+          # Exclude GoReleaser's dist/ so the "source" SBOM reflects the
+          # repository, not the build outputs produced in the previous step.
+          syft dir:. \
+            --exclude './dist/**' \
+            --output "cyclonedx-json=dist/scat-${GITHUB_REF_NAME}-source.cdx.json"
 
       - name: Upload SBOM to GitHub release
         shell: bash
@@ -50,7 +54,7 @@ jobs:
           gh release upload "$TAG" "dist/scat-${TAG}-source.cdx.json" --clobber
 
       - name: Attest build provenance for release archives
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
           subject-path: |
             dist/*.tar.gz
@@ -58,7 +62,7 @@ jobs:
             dist/checksums.txt
 
       - name: Attest source SBOM (CycloneDX) against all archives
-        uses: actions/attest-sbom@v2
+        uses: actions/attest-sbom@bd218ad0dbcb3e146bd073d1d9c6d78e08aa8a0b # v2.4.0
         with:
           subject-path: |
             dist/*.tar.gz
@@ -72,13 +76,25 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          for f in dist/*.tar.gz dist/*.zip dist/checksums.txt; do
+
+          archives=( dist/*.tar.gz dist/*.zip )
+          if (( ${#archives[@]} == 0 )); then
+            echo "no release archives found in dist/ — refusing to declare verification passed" >&2
+            ls -la dist/ >&2 || true
+            exit 1
+          fi
+          if [[ ! -f dist/checksums.txt ]]; then
+            echo "dist/checksums.txt missing — refusing to declare verification passed" >&2
+            exit 1
+          fi
+
+          for f in "${archives[@]}" dist/checksums.txt; do
             echo "Verifying $f"
             gh attestation verify "$f" --repo "${GITHUB_REPOSITORY}"
           done
 
       - name: Upload dist/ for downstream jobs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: dist
           path: dist/
@@ -103,7 +119,7 @@ jobs:
           repositories: homebrew-tap
 
       - name: Download dist/
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: dist
           path: dist
