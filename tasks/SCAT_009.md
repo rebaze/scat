@@ -1,6 +1,6 @@
 # Sigstore + SLSA Build L3 for releases
 
-Status: OPEN
+Status: CLOSED
 
 ## Summary
 

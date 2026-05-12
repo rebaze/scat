@@ -80,20 +80,40 @@ Verify a downloaded archive came from this repository's release pipeline:
 # With the GitHub CLI (recommended — no extra tools to install)
 gh attestation verify scat_<version>_<os>_<arch>.tar.gz --repo rebaze/scat
 
-# With cosign (no GitHub auth required)
-cosign verify-attestation \
+# With cosign (download the attestation bundle first; archives are blobs,
+# not OCI images, so use verify-blob-attestation)
+gh attestation download scat_<version>_<os>_<arch>.tar.gz --repo rebaze/scat
+# The downloaded .jsonl holds both attestations (provenance + SBOM) — one
+# per line. Split them by inspecting each bundle's predicate type.
+jq -c 'select((.dsseEnvelope.payload | @base64d | fromjson | .predicateType) | startswith("https://slsa.dev/provenance"))' \
+  sha256:*.jsonl > bundle.provenance.json
+jq -c 'select((.dsseEnvelope.payload | @base64d | fromjson | .predicateType) == "https://cyclonedx.org/bom")' \
+  sha256:*.jsonl > bundle.sbom.json
+cosign verify-blob-attestation \
+  --bundle bundle.provenance.json \
+  --new-bundle-format \
   --type slsaprovenance1 \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
   --certificate-identity-regexp "^https://github\.com/rebaze/scat/\.github/workflows/release\.yaml@refs/tags/" \
   scat_<version>_<os>_<arch>.tar.gz
 ```
 
-The CycloneDX SBOM (`scat-v<version>-source.cdx.json`) is attested against the release archives as subjects (not against the SBOM file itself). To verify the SBOM attestation, run `gh attestation verify` against a release **archive** with the CycloneDX predicate type:
+The CycloneDX SBOM (`scat-v<version>-source.cdx.json`) is attested against the release archives as subjects (not against the SBOM file itself). To verify the SBOM attestation, point the verifier at a release **archive** with the CycloneDX predicate type:
 
 ```bash
+# With the GitHub CLI
 gh attestation verify scat_<version>_<os>_<arch>.tar.gz \
   --repo rebaze/scat \
   --predicate-type https://cyclonedx.org/bom
+
+# With cosign (reuses bundle.sbom.json extracted above)
+cosign verify-blob-attestation \
+  --bundle bundle.sbom.json \
+  --new-bundle-format \
+  --type cyclonedx \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --certificate-identity-regexp "^https://github\.com/rebaze/scat/\.github/workflows/release\.yaml@refs/tags/" \
+  scat_<version>_<os>_<arch>.tar.gz
 ```
 
 ## CLI Reference
