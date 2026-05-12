@@ -37,7 +37,8 @@ jobs:
             exit 0
           fi
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            BASE="origin/${{ github.event.pull_request.base.ref }}"
+            BASE="${{ github.event.pull_request.base.sha }}"
+            git cat-file -e "$BASE" 2>/dev/null || git fetch --no-tags --depth=1 origin "$BASE"
             CHANGED=$(git diff --name-only "$BASE...HEAD")
           else
             BASE="${{ github.event.before }}"
@@ -51,6 +52,9 @@ jobs:
           echo "$CHANGED"
           go=false
           if grep -E '(\.go$|^go\.(mod|sum)$)' <<<"$CHANGED" >/dev/null; then go=true; fi
+          # //go:embed inputs (see internal/report/html.go) — changes here
+          # alter the compiled binary even when no .go file changes.
+          if grep -E '^internal/report/(templates|assets)/' <<<"$CHANGED" >/dev/null; then go=true; fi
           if grep -E '^\.github/workflows/codeql\.yaml$' <<<"$CHANGED" >/dev/null; then go=true; fi
           echo "go=$go" >> "$GITHUB_OUTPUT"
 
