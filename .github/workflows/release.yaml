@@ -88,10 +88,30 @@ jobs:
             exit 1
           fi
 
+          # Two predicate-typed passes: gh attestation verify without
+          # --predicate-type succeeds on the first valid attestation it finds,
+          # so a single loop cannot tell whether *both* the provenance and
+          # SBOM attestations are present. Enforce each explicitly.
+
+          echo "::group::Verify SLSA provenance attestations"
           for f in "${archives[@]}" dist/checksums.txt; do
-            echo "Verifying $f"
-            gh attestation verify "$f" --repo "${GITHUB_REPOSITORY}"
+            echo "Verifying provenance: $f"
+            gh attestation verify "$f" \
+              --repo "${GITHUB_REPOSITORY}" \
+              --predicate-type https://slsa.dev/provenance/v1
           done
+          echo "::endgroup::"
+
+          # SBOM attestations are only attached to archives (see the
+          # actions/attest-sbom subject-path above), not to checksums.txt.
+          echo "::group::Verify CycloneDX SBOM attestations"
+          for f in "${archives[@]}"; do
+            echo "Verifying SBOM: $f"
+            gh attestation verify "$f" \
+              --repo "${GITHUB_REPOSITORY}" \
+              --predicate-type https://cyclonedx.org/bom
+          done
+          echo "::endgroup::"
 
       - name: Upload dist/ for downstream jobs
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
