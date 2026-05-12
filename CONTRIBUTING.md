@@ -28,7 +28,7 @@ A PR is ready for review once **all** of the following hold:
 - **Scoped** — keep PRs focused on a single change. Unrelated refactors and formatting churn belong in separate PRs.
 - **Conventional in spirit** — commit messages explain the *why*, not just the *what*. Reference any related issue or `tasks/SCAT_NNN.md` task file.
 
-CI enforces the first four automatically: `build` and `Analyze Go` (CodeQL) are required status checks on `main`, and the branch must be up to date before merging. Merges use squash or rebase — merge commits on `main` are disallowed by the repository ruleset.
+Run `gofmt -l .` locally before opening a PR. CI enforces `go vet`, `go test`, `go build`, and `goreleaser check` on PRs; `CI / build` and `CodeQL / Analyze Go` are required checks on `main`, and the branch must be up to date before merging. Merges use squash or rebase — merge commits on `main` are disallowed by the repository ruleset.
 
 ## Project layout
 
