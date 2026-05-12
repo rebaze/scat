@@ -70,6 +70,32 @@ cd scat
 make build    # injects version, commit, and build date via ldflags
 ```
 
+## Verifying releases
+
+Every published release is signed via [Sigstore](https://www.sigstore.dev/) and ships with a [SLSA v1.0 Build Level 3](https://slsa.dev/spec/v1.0/levels#build-l3) provenance attestation plus a CycloneDX SBOM attestation, both produced by the [release workflow](.github/workflows/release.yaml) using GitHub Artifact Attestations.
+
+Verify a downloaded archive came from this repository's release pipeline:
+
+```bash
+# With the GitHub CLI (recommended — no extra tools to install)
+gh attestation verify scat_<version>_<os>_<arch>.tar.gz --repo rebaze/scat
+
+# With cosign (no GitHub auth required)
+cosign verify-attestation \
+  --type slsaprovenance1 \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --certificate-identity-regexp "^https://github\.com/rebaze/scat/\.github/workflows/release\.yaml@refs/tags/" \
+  scat_<version>_<os>_<arch>.tar.gz
+```
+
+The CycloneDX SBOM (`scat-v<version>-source.cdx.json`) is attested against the release archives as subjects (not against the SBOM file itself). To verify the SBOM attestation, run `gh attestation verify` against a release **archive** with the CycloneDX predicate type:
+
+```bash
+gh attestation verify scat_<version>_<os>_<arch>.tar.gz \
+  --repo rebaze/scat \
+  --predicate-type https://cyclonedx.org/bom
+```
+
 ## CLI Reference
 
 ```
