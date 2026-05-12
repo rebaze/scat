@@ -1,6 +1,6 @@
 module github.com/rebaze/scat
 
-go 1.25.8
+go 1.26.3
 
 require (
 	github.com/anchore/clio v0.1.0
