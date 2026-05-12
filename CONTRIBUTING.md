@@ -20,7 +20,7 @@ Direct pushes to `main` are not permitted. Every change lands through a PR.
 
 A PR is ready for review once **all** of the following hold:
 
-- **Formatted** — Go code is `gofmt`-clean (`gofmt -l .` returns no output).
+- **Formatted** — Go code is `gofmt`-clean (`find . -name '*.go' -print0 | xargs -0 gofmt -l` returns no output).
 - **Vetted** — `go vet ./...` is clean.
 - **Tested** — `go test ./...` passes. New behaviour ships with tests; bug fixes ship with a regression test where practical.
 - **Builds** — `go build ./...` succeeds on the Go toolchain pinned in `go.mod`.
