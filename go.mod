@@ -8,7 +8,7 @@ require (
 	github.com/anchore/syft v1.44.0
 	github.com/charmbracelet/bubbles v1.0.0
 	github.com/charmbracelet/bubbletea v1.3.10
-	github.com/package-url/packageurl-go v0.1.5
+	github.com/package-url/packageurl-go v0.1.6
 	github.com/spf13/cobra v1.10.2
 )
 
