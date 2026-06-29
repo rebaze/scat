@@ -3,7 +3,7 @@ module github.com/rebaze/scat
 go 1.26.3
 
 require (
-	github.com/anchore/clio v0.1.0
+	github.com/anchore/clio v0.1.1
 	github.com/anchore/grype v0.112.0
 	github.com/anchore/syft v1.44.0
 	github.com/charmbracelet/bubbles v1.0.0
@@ -42,10 +42,10 @@ require (
 	github.com/acobaugh/osrelease v0.1.0 // indirect
 	github.com/adrg/xdg v0.5.3 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/anchore/fangs v0.1.0 // indirect
+	github.com/anchore/fangs v0.1.1 // indirect
 	github.com/anchore/go-collections v0.1.0 // indirect
-	github.com/anchore/go-homedir v0.1.0 // indirect
-	github.com/anchore/go-logger v0.1.0 // indirect
+	github.com/anchore/go-homedir v0.1.1 // indirect
+	github.com/anchore/go-logger v0.1.1 // indirect
 	github.com/anchore/go-lzo v0.1.0 // indirect
 	github.com/anchore/go-macholibre v0.1.0 // indirect
 	github.com/anchore/go-rpmdb v0.1.0 // indirect
@@ -288,8 +288,8 @@ require (
 	golang.org/x/net v0.55.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
-	golang.org/x/sys v0.45.0 // indirect
-	golang.org/x/term v0.43.0 // indirect
+	golang.org/x/sys v0.46.0 // indirect
+	golang.org/x/term v0.44.0 // indirect
 	golang.org/x/text v0.37.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	golang.org/x/tools v0.45.0 // indirect
